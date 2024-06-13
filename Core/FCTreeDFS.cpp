@@ -1,9 +1,10 @@
-#include "FCTreeBuilder.h"
+#include "FCTreeDFS.h"
 
-FCTreeBuilder::~FCTreeBuilder(){
+FCTreeDFS::~FCTreeDFS()
+{
 }
 
-void FCTreeBuilder::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
+void FCTreeDFS::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
     cout << "( ";
     cout << " k = " << klmd[0] << " ";
     cout << " lmd = " << klmd[1] << " ";
@@ -16,43 +17,7 @@ void FCTreeBuilder::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_ve
 }
 
 
-void FCTreeBuilder::Execute(MultilayerGraph &mg){
-    
-    uint count = 0;
-    uint n_vertex = mg.GetN(); // number of vertex
-    uint n_layers = mg.getLayerNumber();
-    uint **degs, **adj_list;
-
-    degs = new uint*[n_vertex];
-
-    for(int v = 0; v < n_vertex; v ++){
-        degs[v] = new uint[n_layers];
-        for(int l = 0; l < n_layers; l ++){
-            degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
-        }
-    }
-
-    uint* core = new uint[n_vertex];
-    uint* pos = new uint[n_vertex];
-
-    for(int i = 0; i < n_vertex; i ++){
-        core[i] = i;
-        // vertex i is in the i-th position
-        pos[i] = i;
-    }
-
-    uint klmd[2];
-    klmd[0] = 1; // k
-    klmd[1] = 1; // lmd
-
-    uint e = 0;
-    BuildSubFCTree(mg, degs, core, pos, klmd, e, count);
-
-    cout << "count = " << count << endl;
-
-}
-
-bool FCTreeBuilder::check(uint **degs, uint u, uint *klmd, uint n_layers){
+bool FCTreeDFS::check(uint **degs, uint u, uint *klmd, uint n_layers){
     uint k = klmd[0];
     uint lmd = klmd[1];
     uint cnt = 0;
@@ -67,7 +32,7 @@ bool FCTreeBuilder::check(uint **degs, uint u, uint *klmd, uint n_layers){
     return false;
 }
 
-uint FCTreeBuilder::peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint s, uint e){
+uint FCTreeDFS::peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint s, uint e){
 
     uint n_layers = mg.getLayerNumber();
     uint old_s = s;
@@ -114,28 +79,7 @@ uint FCTreeBuilder::peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *cor
 
 }
 
-
-void FCTreeBuilder::restore(MultilayerGraph &mg, uint **degs, uint *core, uint old_e, uint new_e){
-
-    uint n_layers = mg.getLayerNumber();
-    uint **adj_lst;
-    uint u, v;
-
-    // [old_e, new_e) is the elements that change from active -> inactive during this time.
-    for(int i = 0; i < n_layers; i ++){
-        adj_lst = mg.GetGraph(i).GetAdjLst();
-        for(int j = old_e; j < new_e; j ++){   
-            v = core[j];
-            for(int l = 1; l <= adj_lst[v][0]; l ++){
-                u = adj_lst[v][l];
-                degs[u][i] ++;
-            }
-        }
-    } 
-}
-
-
-void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count){
+void FCTreeDFS::dfs(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint e, uint &count){
 
     uint s = e;
     uint old_e = e;
@@ -144,6 +88,7 @@ void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core,
     uint n_vertex = mg.GetN();
     uint n_layer = mg.getLayerNumber();
     uint old_pos_v;
+
 
     for(int i = s; i < n_vertex; i ++){
         uint v = core[i];
@@ -167,6 +112,7 @@ void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core,
             pos[v] = e ++;
 
         }
+
     }
 
     if(s != e){
@@ -175,23 +121,84 @@ void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core,
         new_e = e;
     }
 
-    if(n_vertex - new_e > 0){
+    if(n_vertex - new_e > 0){  
+        PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        // cout << "count = " << count << endl;
         count ++;
-        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        // Change lmd to get the new results         
         klmd[1] += 1;
-        BuildSubFCTree(mg, degs, core, pos, klmd, new_e, count); 
+        dfs(mg, degs, klmd, core, pos,  e, count);
         klmd[1] -= 1;
-    }
-
-    if(n_vertex - new_e > 0 && klmd[1] == 1){
+        // restore(mg, degs, core, old_e, new_e);
+        // s = old_e;
+        // e = old_e;
+        // Change k to get the new results
         klmd[0] += 1;
-        BuildSubFCTree(mg, degs, core, pos, klmd, new_e, count);
-        klmd[0] -= 1; 
-
+        dfs(mg, degs, klmd, core, pos,  e, count);
+        klmd[0] -= 1;
+        
     }
 
-    restore(mg, degs, core, old_e, new_e); 
+    restore(mg, degs, core, old_e, new_e);
+        s = old_e;
+        e = old_e;
 
-    s = old_e;
-    e = old_e;   
+}
+
+void FCTreeDFS::Execute(MultilayerGraph &mg){
+
+    uint n_vertex = mg.GetN(); // number of vertex
+    uint n_layers = mg.getLayerNumber();
+    uint **degs, **adj_list;
+
+    degs = new uint*[n_vertex];
+
+    for(int v = 0; v < n_vertex; v ++){
+        degs[v] = new uint[n_layers];
+        for(int l = 0; l < n_layers; l ++){
+            degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
+            cout << degs[v][l] << endl;
+        }
+    }
+
+    uint* core = new uint[n_vertex];
+    uint* pos = new uint[n_vertex];
+
+    for(int i = 0; i < n_vertex; i ++){
+        core[i] = i;
+        // vertex i is in the i-th position
+        pos[i] = i;
+    }
+
+    uint klmd[2];
+    klmd[0] = 1; // k
+    klmd[1] = 1; // lmd
+
+    uint e = 0;    
+    uint count = 0;
+
+    cout << "I am here in Execute()" << endl;
+
+    dfs(mg, degs, klmd, core, pos, e, count);
+
+    cout << "count = " << count << endl;
+}
+
+void FCTreeDFS::restore(MultilayerGraph &mg, uint **degs, uint *core, uint old_e, uint new_e){
+
+    uint n_layers = mg.getLayerNumber();
+    uint **adj_lst;
+    uint u, v;
+
+    // [old_e, new_e) is the elements that change from active -> inactive during this time.
+    for(int i = 0; i < n_layers; i ++){
+        adj_lst = mg.GetGraph(i).GetAdjLst();
+        for(int j = old_e; j < new_e; j ++){   
+            v = core[j];
+            for(int l = 1; l <= adj_lst[v][0]; l ++){
+                u = adj_lst[v][l];
+                degs[u][i] ++;
+            }
+        }
+    } 
 }

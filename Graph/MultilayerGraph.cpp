@@ -7,6 +7,16 @@ MultilayerGraph::~MultilayerGraph(){
     delete[] graph_layers;    
 }
 
+void MultilayerGraph::SetGraphOrder(int o){
+    if (o == 0){
+        
+    }else if(o == 1){
+      
+    }else if(o == 2){
+
+    }
+}
+
 void MultilayerGraph::GetGraphFile(const std::string &input_path, std::vector<std::string> &graph_files){
 
     std::string conf_file = input_path + "mlg.conf";
@@ -40,6 +50,12 @@ void MultilayerGraph::LoadFromFile(const std::string &input_path){
     //How many layer we have for this graph
     graph_layers = new Graph[n_layers];
 
+    order = new uint[n_layers];
+    for(int i = 0; i < n_layers; i ++){
+        order[i] = i;
+    }
+
+
     edge_buf.resize(n_layers);
     edge_size.resize(n_layers);
 
@@ -57,7 +73,6 @@ void MultilayerGraph::LoadFromFile(const std::string &input_path){
 
 
 }
-
 
 uint MultilayerGraph::LoadLayer(const std::string &graph_file, edge *&edge_buf, unordered_map<ll_uint, uint> &vtx2id, std::basic_ofstream<char> &map_file_out){
     

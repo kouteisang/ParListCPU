@@ -12,6 +12,7 @@ class MultilayerGraph{
 private:
     uint n{0};
     uint n_layers{0};
+    uint *order{nullptr};
     Graph *graph_layers{nullptr};
     string map_file;
 
@@ -27,6 +28,7 @@ public:
 
     void LoadFromFile(const std::string &input_path);
     void GetGraphFile(const std::string &input_path,  std::vector<std::string> &graph_files);
+    void SetGraphOrder(int o);
 
     void LoadId2VtxMap(ll_uint * id2vtx);
     void LoadVtx2IdMap(unordered_map<ll_uint, uint> &vtx2id);
@@ -35,19 +37,22 @@ public:
     void PrintStatistics();
 
     inline Graph &GetGraph(uint i) {
-        return graph_layers[i];
+        return graph_layers[order[i]];
     }
 
     inline uint getLayerNumber(){
         return n_layers;
     }
-    
 
     [[nodiscard]] inline uint GetN() const {
         return n;
     }
 
+    [[nodiscard]] inline uint* GetOrder() const {
+        return order;
+    }
 
+    
 };
 
 #endif

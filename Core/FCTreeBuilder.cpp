@@ -177,7 +177,7 @@ void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core,
 
     if(n_vertex - new_e > 0){
         count ++;
-        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        PrintCoreInfor(klmd, core, new_e, n_vertex); 
         klmd[1] += 1;
         BuildSubFCTree(mg, degs, core, pos, klmd, new_e, count); 
         klmd[1] -= 1;

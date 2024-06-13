@@ -127,21 +127,22 @@ void FCTreeDFS::dfs(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, ui
         count ++;
         // Change lmd to get the new results         
         klmd[1] += 1;
-        dfs(mg, degs, klmd, core, pos,  e, count);
+        dfs(mg, degs, klmd, core, pos,  new_e, count);
         klmd[1] -= 1;
-        // restore(mg, degs, core, old_e, new_e);
-        // s = old_e;
-        // e = old_e;
+    }
+
+    if(n_vertex - new_e > 0){
         // Change k to get the new results
         klmd[0] += 1;
-        dfs(mg, degs, klmd, core, pos,  e, count);
+        dfs(mg, degs, klmd, core, pos,  new_e, count);
         klmd[0] -= 1;
-        
     }
 
     restore(mg, degs, core, old_e, new_e);
-        s = old_e;
-        e = old_e;
+    s = old_e;
+    e = old_e;
+
+    
 
 }
 
@@ -157,7 +158,7 @@ void FCTreeDFS::Execute(MultilayerGraph &mg){
         degs[v] = new uint[n_layers];
         for(int l = 0; l < n_layers; l ++){
             degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
-            cout << degs[v][l] << endl;
+            // cout << degs[v][l] << endl;
         }
     }
 
@@ -177,7 +178,6 @@ void FCTreeDFS::Execute(MultilayerGraph &mg){
     uint e = 0;    
     uint count = 0;
 
-    cout << "I am here in Execute()" << endl;
 
     dfs(mg, degs, klmd, core, pos, e, count);
 

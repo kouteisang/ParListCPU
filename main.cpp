@@ -11,6 +11,8 @@ int main(int argc, char* argv[]){
     string dataset = "example";
     string method = "serial";
     int order = 0;
+    uint k = 0;
+    uint lmd = 0;
 
     for(int i = 1; i < argc; i ++){
         string arg = argv[i];
@@ -22,6 +24,12 @@ int main(int argc, char* argv[]){
         }
         if(arg == "-o" && i + 1 < argc){
             order = std::atoi(argv[++i]);
+        }
+        if(arg == "-k" && i + 1 < argc){
+            k = std::atoi(argv[++i]);
+        }
+        if(arg == "-lmd" && i + 1 < argc){
+            lmd = std::atoi(argv[++i]);
         }
     }
 
@@ -64,11 +72,16 @@ int main(int argc, char* argv[]){
         std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
 
 
-        coreNode* res_node = tree.getCoreByKAndLmd(tree.getNode(), 3, 10);
-        if(res_node == nullptr){
-            cout << "No statisfy result" << endl;
-        }else{
-            tree.saveCoreToLocal(dataset, id2vtx, res_node);
+        // This part to get the output
+        if(k != 0 && lmd != 0){
+            k = uint(k);
+            lmd = uint(lmd);
+            coreNode* res_node = tree.getCoreByKAndLmd(tree.getNode(), k, lmd);
+            if(res_node == nullptr){
+                cout << "No statisfy result" << endl;
+            }else{
+                tree.saveCoreToLocal(dataset, id2vtx, res_node);
+            }
         }
 
     }

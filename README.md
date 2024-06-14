@@ -30,4 +30,10 @@ order(-o):
 - 1 stand for numbe of edges from large to small
 - 2 stand for number of edges from small to large
 
+k(-k), only in the serial, parallel version can use:
 
+- k: specify the output k
+
+m(-m), only in the serial, parallel version can use:
+
+- lmd: specify the output lambda 

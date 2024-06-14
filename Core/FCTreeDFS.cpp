@@ -122,7 +122,7 @@ void FCTreeDFS::dfs(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, ui
     }
 
     if(n_vertex - new_e > 0){  
-        PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
         // cout << "count = " << count << endl;
         count ++;
         // Change lmd to get the new results         

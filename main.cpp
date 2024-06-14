@@ -3,6 +3,7 @@
 #include "Graph/MultilayerGraph.h"
 #include "Core/FCTreeBuilder.h"
 #include "Core/FCTreeDFS.h"
+#include "Core/FCTree.h"
 #include <omp.h>
 
 int main(int argc, char* argv[]){
@@ -44,15 +45,32 @@ int main(int argc, char* argv[]){
     cout << endl;
     mg.PrintStatistics();
 
+    ll_uint *id2vtx = new ll_uint[mg.GetN()];
+    mg.LoadId2VtxMap(id2vtx);
 
 
     if(method == "serial"){
         auto start_time = omp_get_wtime();
-        FCTreeBuilder::Execute(mg);
+        // This method simply traverse the tree
+        // FCTreeBuilder::Execute(mg);
+
+        // This method get the result and store the result in the tree
+        FCTree tree(1, 1, mg.GetN());
+        FCTreeBuilder::Execute(mg, tree);
+        
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
         std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
+
+
+        coreNode* res_node = tree.getCoreByKAndLmd(tree.getNode(), 3, 10);
+        if(res_node == nullptr){
+            cout << "No statisfy result" << endl;
+        }else{
+            tree.saveCoreToLocal(dataset, id2vtx, res_node);
+        }
+
     }
 
     if(method == "dfs"){

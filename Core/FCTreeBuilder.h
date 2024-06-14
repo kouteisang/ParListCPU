@@ -2,6 +2,7 @@
 #define FCTreeBuilder_H
 
 #include "Graph/MultilayerGraph.h"
+#include "Core/FCTree.h"
 
 class FCTreeBuilder{
 private:
@@ -12,7 +13,11 @@ public:
 
     static void Execute(MultilayerGraph &mg);
 
+    static void Execute(MultilayerGraph &mg, FCTree &tree);
+
     static void BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count);
+
+    static void BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count, coreNode* node);
 
     static uint peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint s, uint e);
 
@@ -21,6 +26,8 @@ public:
     static void restore(MultilayerGraph &mg, uint **degs, uint *core, uint old_e, uint new_e);
 
     static void PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex);
+
+    static void constructCore(uint *klmd, uint *core, uint new_e, uint n_vertex, coreNode *node);
 };
 
 

@@ -21,8 +21,11 @@ dataset(-d):
 
 method(-m):
 
-- serial (FirmCore Tree based solution)
-- dfs
+- serial (FirmCore Tree based solution, including buiding the tree structure, i.e, FCTree)
+- dfs (dfs version, go through all the nodes)
+- pathk (path level parallization by k)
+- pathlmd (path level parallization by lmd)
+- core (core level parallization)
 
 order(-o):
 

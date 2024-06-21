@@ -8,6 +8,7 @@
 #include <sstream>
 #include <algorithm>
 #include <unordered_map>
+#include <omp.h>
 
 
 using std::string;

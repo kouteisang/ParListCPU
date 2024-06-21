@@ -4,7 +4,9 @@
 #include "Core/FCTreeBuilder.h"
 #include "Core/FCTreeDFS.h"
 #include "Core/FCTree.h"
-#include <omp.h>
+#include "Core/FCTreeBuilderPathParallelByk.h"
+#include "Core/FCTreeBuilderPathParallelBylmd.h"
+#include "header.h"
 
 int main(int argc, char* argv[]){
 
@@ -64,23 +66,23 @@ int main(int argc, char* argv[]){
 
         // This method get the result and store the result in the tree
         FCTree tree(1, 1, mg.GetN());
-        FCTreeBuilder::Execute(mg, tree);
-        
+        // FCTreeBuilder::Execute(mg, tree);
+        FCTreeBuilder::Execute(mg); 
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
-        std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
+        std::cout << "Serial Elapsed time: " << elapsed_time << " seconds\n";
 
 
         // This part to get the output
         if(k != 0 && lmd != 0){
             k = uint(k);
             lmd = uint(lmd);
-            coreNode* res_node = tree.getCoreByKAndLmd(tree.getNode(), k, lmd);
+            coreNode* res_node = tree.getCoreByKAndLmdByLeft(tree.getNode(), k, lmd);
             if(res_node == nullptr){
                 cout << "No statisfy result" << endl;
             }else{
-                tree.saveCoreToLocal(dataset, id2vtx, res_node);
+                tree.saveCoreToLocal(dataset, id2vtx, res_node, "serial");
             }
         }
 
@@ -92,7 +94,59 @@ int main(int argc, char* argv[]){
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
-        std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
+        std::cout << "DFS Elapsed time: " << elapsed_time << " seconds\n";
  
     }
+
+
+    if(method == "pathk"){
+        
+        auto start_time = omp_get_wtime();
+        FCTree tree(1, 1, mg.GetN());
+        FCTreeBuilderPathParallelByk::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Pathk Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+
+        if(k != 0 && lmd != 0){
+            k = uint(k);
+            lmd = uint(lmd);
+            coreNode* res_node = tree.getCoreByKAndLmdByLeft(tree.getNode(), k, lmd);
+            if(res_node == nullptr){
+                cout << "No statisfy result" << endl;
+            }else{
+                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathk");
+            }
+        }
+
+
+    }
+
+    if(method == "pathlmd"){
+        
+        auto start_time = omp_get_wtime();
+        FCTree tree(1, 1, mg.GetN());
+        FCTreeBuilderPathParallelBylmd::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+         // This part to get the output
+        if(k != 0 && lmd != 0){
+            k = uint(k);
+            lmd = uint(lmd);
+            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+            if(res_node == nullptr){
+                cout << "No statisfy result" << endl;
+            }else{
+                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
+            }
+        }
+
+
+    }
+
 }

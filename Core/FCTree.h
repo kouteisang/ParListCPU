@@ -12,7 +12,12 @@ struct coreNode{
     unsigned int k{0};
     unsigned int lmd{0};
     unsigned int length{0};
-    uint *core{nullptr};
+    uint** degs{nullptr};
+    uint *core{nullptr}; // result core
+    uint *o_pos{nullptr}; // original pos
+    uint *o_core{nullptr};
+
+    uint e{0}; // e is the start point
 
     coreNode* left;
     coreNode* right;
@@ -43,9 +48,15 @@ public:
         return node;
     }
 
-    coreNode* getCoreByKAndLmd(coreNode *node, int k, unsigned int lmd);
+    coreNode* getCoreByKAndLmdByLeft(coreNode *node, int k, unsigned int lmd);
 
-    void saveCoreToLocal(string dataset, ll_uint *id2vtx, coreNode *node);
+    coreNode* getCoreByKAndLmdByRight(coreNode *node, int k, unsigned int lmd);
+
+    void saveCoreToLocal(string dataset, ll_uint *id2vtx, coreNode *node, string method);
+
+    //Test when program
+    void traversal(coreNode *node, uint& count);
+
 
 };
 

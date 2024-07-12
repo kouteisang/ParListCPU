@@ -295,8 +295,12 @@ void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
     //    (2, 1)(1, 2)
     // (3, 1)  (2, 2)  (1, 3)
     // (1, 1), (2, 1), (3, 1)  Path serial
+    auto start_time = omp_get_wtime();
     PathSerial(mg, klmd, degs, node, core, pos, e, count); 
+    auto end_time = omp_get_wtime(); 
 
+    double elapsed_time_serial = end_time - start_time;
+    std::cout << "Pathlmd elapsed_time_serial Elapsed time: " << elapsed_time_serial << " seconds\n";
 
 // Path parallel
 #pragma omp parallel

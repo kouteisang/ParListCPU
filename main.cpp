@@ -66,8 +66,7 @@ int main(int argc, char* argv[]){
 
         // This method get the result and store the result in the tree
         FCTree tree(1, 1, mg.GetN());
-        // FCTreeBuilder::Execute(mg, tree);
-        FCTreeBuilder::Execute(mg); 
+        FCTreeBuilder::Execute(mg, tree);
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
@@ -79,6 +78,7 @@ int main(int argc, char* argv[]){
             k = uint(k);
             lmd = uint(lmd);
             coreNode* res_node = tree.getCoreByKAndLmdByLeft(tree.getNode(), k, lmd);
+            cout << k << " " << lmd << endl;
             if(res_node == nullptr){
                 cout << "No statisfy result" << endl;
             }else{
@@ -144,6 +144,13 @@ int main(int argc, char* argv[]){
             }else{
                 tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
             }
+        }
+        
+        // For test use only
+        for(int l = 1; l < mg.getLayerNumber(); l ++){
+            uint num_valid = 0;
+            tree.getNumValidRight(tree.getNode(), l, num_valid);
+            cout << "when lmd = " << l << " k max = " << num_valid << endl;
         }
 
 

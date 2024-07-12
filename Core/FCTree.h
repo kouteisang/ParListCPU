@@ -57,6 +57,8 @@ public:
     //Test when program
     void traversal(coreNode *node, uint& count);
 
+    // Test when program
+    void getNumValidRight(coreNode *node, uint lmd, uint& num_valid);
 
 };
 

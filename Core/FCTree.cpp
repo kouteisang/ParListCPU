@@ -15,6 +15,18 @@ void FCTree::traversal(coreNode *node, uint &count){
         traversal(node->right, count);
     }
 }
+// Test
+void FCTree::getNumValidRight(coreNode *node, uint lmd, uint &num_valid){
+    if(node == nullptr){
+        return ;
+    }
+    if(lmd == node->lmd){
+        num_valid ++;
+        return getNumValidRight(node->left, lmd, num_valid); 
+    }else if(lmd > node->lmd){
+        return getNumValidRight(node->right, lmd, num_valid);
+    }
+}
 
 coreNode* FCTree::getCoreByKAndLmdByLeft(coreNode *node, int k, unsigned int lmd){
     if(node->k == 0 && node->lmd == 0){

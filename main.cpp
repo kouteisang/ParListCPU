@@ -6,6 +6,7 @@
 #include "Core/FCTree.h"
 #include "Core/FCTreeBuilderPathParallelByk.h"
 #include "Core/FCTreeBuilderPathParallelBylmd.h"
+#include "Core/FCTreeBuilderCoreParallel.h"
 #include "header.h"
 
 int main(int argc, char* argv[]){
@@ -153,6 +154,19 @@ int main(int argc, char* argv[]){
             cout << "when lmd = " << l << " k max = " << num_valid << endl;
         }
 
+
+    }
+
+    if(method == "core"){
+        
+        FCTree tree(1, 1, mg.GetN());
+        FCTreeBuilderCoreParallel::Execute(mg, tree, id2vtx);
+
+        // int a[2][2] = {{1, 1}, {1, 1}};
+
+        // // auto origin = __sync_fetch_and_sub(&a[1][0], 1);
+        // // cout << "origin = " << origin << endl;
+        // // cout << "a[1][0]" << a[1][0] << endl;
 
     }
 

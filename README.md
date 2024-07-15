@@ -39,4 +39,6 @@ k(-k), only in the serial, parallel version can use:
 
 m(-m), only in the serial, parallel version can use:
 
-- lmd: specify the output lambda 
+- lmd: specify the output lambda
+
+- core: each firmcore decomposition parallel

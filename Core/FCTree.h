@@ -32,6 +32,7 @@ struct coreNode{
      
 };
 
+
 class FCTree{
 private:
     coreNode *node;

@@ -6,7 +6,10 @@
 #include "Core/FCTree.h"
 #include "Core/FCTreeBuilderPathParallelByk.h"
 #include "Core/FCTreeBuilderPathParallelBylmd.h"
-#include "Core/FCTreeBuilderCoreParallel.h"
+
+#include "CoreParallel/FCCoreTree.cpp"
+#include "CoreParallel/FCTreeBuilderCoreParallel.h"
+
 #include "header.h"
 
 int main(int argc, char* argv[]){
@@ -159,8 +162,10 @@ int main(int argc, char* argv[]){
 
     if(method == "core"){
         
-        FCTree tree(1, 1, mg.GetN());
-        FCTreeBuilderCoreParallel::Execute(mg, tree, id2vtx);
+        FCCoreTree tree(1, 1, mg.GetN());
+        coreNodeP* node = tree.getNode();
+        cout << node->k << endl;
+        // FCTreeBuilderCoreParallel::Execute(mg, tree, id2vtx);
 
         // int a[2][2] = {{1, 1}, {1, 1}};
 

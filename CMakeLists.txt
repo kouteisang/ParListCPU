@@ -19,10 +19,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/opt/homebrew/opt/libomp/lib -lomp")
 
+add_subdirectory(CoreParallel)
 add_subdirectory(Core)
 add_subdirectory(Graph)
 
 add_executable(firmcore_baseline main.cpp)
 
-target_link_libraries(firmcore_baseline CoreLib GraphLib ${OpenMP_omp_LIBRARY})
+target_link_libraries(firmcore_baseline CoreParallelLib CoreLib GraphLib ${OpenMP_omp_LIBRARY})
 # target_link_libraries(firmcore_baseline  GraphLib ${OpenMP_omp_LIBRARY})

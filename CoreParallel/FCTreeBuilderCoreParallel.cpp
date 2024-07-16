@@ -18,20 +18,17 @@ bool FCTreeBuilderCoreParallel::check(uint **degs, uint u, uint k, uint lmd, uin
     return false;
 }
 
-
 // Parallel Peel Process
-
-bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNode* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx){
+uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx, uint e){
     uint n_vertex = mg.GetN(); // number of vertex
     uint n_layers = mg.getLayerNumber();
     uint cnt = 0;
-    uint s = 0, e = 0, new_e = 0, old_e = 0;
+    uint s = 0, new_e = 0;
     uint **adj_lst;
 
     // Debug for test
     // omp_set_num_threads(1);
 
-    cout << "k = " << k << " lmd = " << lmd << endl;
    
 #pragma omp parallel private(cnt) shared(cnts)
 {
@@ -61,14 +58,11 @@ bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
     }
 }
 
-    cout << "e = " << e << endl;
-
     s = 0;
     new_e = e;
     
     uint vv;
     while(s < e){
-        s = old_e;
 
 #pragma private(vv, adj_lst, u) shared(s, e, new_e, old_e, valid, invalid, degs, cnts, mg)
 {
@@ -99,24 +93,19 @@ bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
         #pragma omp barrier
 }
 
-        old_e = e;
+        s = e;
         e = new_e;
     }
 
-   
-    uint res_count = 0;
-    for(int i = 0; i < n_vertex; i ++){
-        if(valid[i] == 1){
-            cout << id2vtx[i] << " ";
-            res_count ++;
-        }
-    }
-    cout << endl;
-    cout << "res_count after = " << res_count << endl;
+    if(n_vertex - new_e > 0){
 
+    }
+   
+
+    return new_e;
 }
 
-bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNode* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx){
+bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx){
     uint n_vertex = mg.GetN(); // number of vertex
     uint n_layers = mg.getLayerNumber();
     uint cnt = 0;
@@ -209,21 +198,34 @@ bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg
 
 }
 
-void FCTreeBuilderCoreParallel::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *klmd, coreNode* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx){ 
+void FCTreeBuilderCoreParallel::PathSerial(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx){
 
-    // uint k = klmd[0];
-    // uint lmd = klmd[1];
+   uint n_vertex = mg.GetN(); // number of vertex
+   uint n_layers = mg.getLayerNumber();
+   uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, id2vtx, 0);
 
-    uint k = 10;
-    uint lmd = 1;
+   // means the (k, lambda)-constaint has the valid vertex
+   if(n_vertex - new_e > 0){
 
-    PeelInvalidInParallel(mg, degs, k, lmd, node, valid, invalid, cnts, id2vtx);
+   }
+}
+
+void FCTreeBuilderCoreParallel::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *klmd, coreNodeP* node, uint* valid, uint* invalid, uint* cnts, ll_uint *id2vtx){ 
+
+    uint k = klmd[0];
+    uint lmd = klmd[1];
+
+   
+    // flag = true means there are vertex valid
+    // bool flag = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, id2vtx);
+
+    PathSerial(mg, degs, k, lmd, node, valid, invalid, cnts, id2vtx);
 
 }
 
-void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCTree &tree, ll_uint *id2vtx){
+void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree, ll_uint *id2vtx){
 
-    coreNode* node = tree.getNode();
+    coreNodeP* node = tree.getNode();
         
     uint count = 0;
     uint n_vertex = mg.GetN(); // number of vertex

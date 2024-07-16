@@ -54,7 +54,6 @@ coreNode* FCTree::getCoreByKAndLmdByRight(coreNode *node, int k, unsigned int lm
     }
 }
 
-
 void FCTree::saveCoreToLocal(string dataset, ll_uint *id2vtx, coreNode *coreNode, string method){
 
     cout << coreNode << endl;

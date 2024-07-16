@@ -164,14 +164,7 @@ int main(int argc, char* argv[]){
         
         FCCoreTree tree(1, 1, mg.GetN());
         coreNodeP* node = tree.getNode();
-        cout << node->k << endl;
-        // FCTreeBuilderCoreParallel::Execute(mg, tree, id2vtx);
-
-        // int a[2][2] = {{1, 1}, {1, 1}};
-
-        // // auto origin = __sync_fetch_and_sub(&a[1][0], 1);
-        // // cout << "origin = " << origin << endl;
-        // // cout << "a[1][0]" << a[1][0] << endl;
+        FCTreeBuilderCoreParallel::Execute(mg, tree, id2vtx);
 
     }
 

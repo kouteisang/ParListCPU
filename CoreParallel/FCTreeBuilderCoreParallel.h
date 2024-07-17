@@ -30,6 +30,12 @@ public:
 
     static void constructCore(coreNodeP *node, uint k, uint lmd, uint new_e, uint n_vertex, uint n_layer, bool* valid, uint* invalid, uint** degs, uint* cnts, bool serial);
 
+    // Mix strategy
+    static void ExecuteMix(MultilayerGraph &mg, FCCoreTree &tree);
+
+    static void BuildSubFCTreeMix(FCCoreTree &tree, MultilayerGraph &mg, uint **degs, uint *klmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts);
+
+    static void PathByKTask(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e);
 
 };
 

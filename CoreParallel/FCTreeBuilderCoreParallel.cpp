@@ -48,18 +48,7 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
         memcpy(node->cnts, cnts, n_vertex * sizeof(uint));
     }
 
-    // if(k == 3 && lmd == 10){
-        // cout << "k = " << node->k << " lmd = " << node->lmd << " length = " << node->length << " node->e = " << node->e <<endl;
-    // }
-
-    // int num_invalid = 0;
-    // for(int i = 0; i < n_vertex; i ++){
-    //     if(node->valid[i] == 0){
-    //         num_invalid ++;
-    //     }
-    // }
-
-    // cout << "num_invalid = " << num_invalid << endl;
+    // cout << "k = " << node->k << " lmd = " << node->lmd << " length = " << node->length << endl;
 }
 
 // Parallel Peel Process
@@ -73,7 +62,6 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
     // Debug for test
     // omp_set_num_threads(1);
 
-   
 #pragma omp parallel private(cnt) shared(cnts)
 {
     uint tid = omp_get_thread_num();
@@ -102,13 +90,11 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
         }
     }
 }
-
     new_e = e;
     
     uint vv;
     while(s < e){
-
-#pragma private(vv, adj_lst, u) shared(s, e, new_e, old_e, valid, invalid, degs, cnts, mg)
+#pragma omp parallel private(vv, adj_lst) shared(s, e, new_e, valid, invalid, degs, cnts, mg)
 {
         #pragma omp for
         for(uint j = s; j < e; j ++){
@@ -141,7 +127,6 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
         s = e;
         e = new_e;
     }
-
     if(n_vertex - new_e > 0){
         constructCore(node, k, lmd, new_e, n_vertex, n_layers, valid, invalid, degs, cnts, serial);
     }else{
@@ -263,10 +248,8 @@ void FCTreeBuilderCoreParallel::PathByK(MultilayerGraph &mg, uint **degs, uint k
     uint n_vertex = mg.GetN(); // number of vertex
     uint n_layers = mg.getLayerNumber(); // number of layer
     
-    
 
     uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, e, false);
-    // cout << "new_e = " << new_e << endl;
     // means the (k, lambda)-constaint has the valid vertex
     if(n_vertex - new_e > 0){
         k += 1;
@@ -348,4 +331,113 @@ void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree){
     for (uint i = 0; i < n_vertex; i++) delete[] degs[i];
     delete[] degs;
 
+}
+
+
+
+
+// Mix path parallel and Core strategy together
+
+void FCTreeBuilderCoreParallel::PathByKTask(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e){
+    uint n_vertex = mg.GetN(); // number of vertex
+    uint n_layers = mg.getLayerNumber(); // number of layer
+    
+
+#pragma omp parallel
+{
+
+    #pragma omp single
+    {
+    uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, e, false);
+        // means the (k, lambda)-constaint has the valid vertex
+        if(n_vertex - new_e > 0){
+            k += 1;
+            coreNodeP* leftChild = new coreNodeP();
+            node->left = leftChild;
+            PathByK(mg, degs, k, lmd, leftChild, valid, invalid, cnts, new_e);
+        }
+    }
+}
+
+} 
+
+void FCTreeBuilderCoreParallel::BuildSubFCTreeMix(FCCoreTree &tree, MultilayerGraph &mg, uint **degs, uint *klmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts){
+
+    uint k = klmd[0];
+    uint lmd = klmd[1];
+    uint n_layers = mg.getLayerNumber();
+
+    uint n_vertex = mg.GetN(); // number of vertex
+
+
+    PathSerial(mg, degs, k, lmd, node, valid, invalid, cnts, 0);
+
+
+    
+
+#pragma omp parallel
+{
+    #pragma omp single
+    {
+        coreNodeP* root = tree.getNode();
+        while(root != nullptr && root->k != 0){
+                #pragma omp task
+                {
+                    coreNodeP* leftChild = new coreNodeP();
+                    root->left = leftChild;
+                    PathByKTask(mg, root->degs, root->k+1, root->lmd, leftChild, root->valid, root->invalid, root->cnts, root->e); 
+                }
+
+                root = root->right;
+        }
+        #pragma omp taskwait
+    }
+}
+
+}
+
+void FCTreeBuilderCoreParallel::ExecuteMix(MultilayerGraph &mg, FCCoreTree &tree){
+    
+    coreNodeP* node = tree.getNode();
+        
+    uint count = 0;
+    uint n_vertex = mg.GetN(); // number of vertex
+    uint n_layers = mg.getLayerNumber();
+    uint **degs, **adj_list;
+    bool* valid = new bool[n_vertex]; // 1 is valid
+    uint* cnts = new uint[n_vertex];
+    uint* invalid = new uint[n_vertex];
+
+    degs = new uint*[n_vertex];
+
+
+    // Parallel init the degree and valid part
+    #pragma omp parallel
+    {
+        #pragma omp for schedule(static)
+        for(int v = 0; v < n_vertex; v ++){
+             degs[v] = new uint[n_layers];
+             valid[v] = true; // 1 is valid
+        } 
+
+        #pragma omp for schedule(static) collapse(2)
+        for(int v = 0; v < n_vertex; v ++){
+            // degs[v] = new uint[n_layers];
+            for(int l = 0; l < n_layers; l ++){
+                degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
+            }
+        }
+    }
+
+
+
+    uint klmd[2];
+    klmd[0] = 1; // k
+    klmd[1] = 1; // lmds
+
+    BuildSubFCTreeMix(tree, mg, degs, klmd, node, valid, invalid, cnts);
+    
+    // Free the memory
+    for (uint i = 0; i < n_vertex; i++) delete[] degs[i];
+    delete[] degs; 
 }

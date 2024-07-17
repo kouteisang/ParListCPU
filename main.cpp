@@ -169,7 +169,20 @@ int main(int argc, char* argv[]){
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
-        std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
+        std::cout << "Pathlmd Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+    }
+
+    if(method == "mix"){
+        omp_set_max_active_levels(2); // Enable nested parallelism
+        auto start_time = omp_get_wtime(); 
+        FCCoreTree tree(1, 1, mg.GetN());
+        coreNodeP* node = tree.getNode();
+        FCTreeBuilderCoreParallel::ExecuteMix(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Pathlmd Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
 
     }
 

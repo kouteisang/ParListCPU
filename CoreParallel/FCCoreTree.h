@@ -12,7 +12,10 @@ struct coreNodeP{
     uint** degs{nullptr};
     uint *core{nullptr}; // result core
     bool *valid{nullptr}; // valid vertex
+    bool *t_valid{nullptr}; // valid vertex
+     
     uint* invalid{nullptr};
+    uint* cnts{nullptr};
 
     uint e{0}; // e is the start point
 

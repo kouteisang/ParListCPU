@@ -29,6 +29,9 @@ void FCTree::getNumValidRight(coreNode *node, uint lmd, uint &num_valid){
 }
 
 coreNode* FCTree::getCoreByKAndLmdByLeft(coreNode *node, int k, unsigned int lmd){
+    if(node == nullptr){
+        return nullptr;
+    }
     if(node->k == 0 && node->lmd == 0){
         return nullptr;
     }
@@ -42,6 +45,9 @@ coreNode* FCTree::getCoreByKAndLmdByLeft(coreNode *node, int k, unsigned int lmd
 }
 
 coreNode* FCTree::getCoreByKAndLmdByRight(coreNode *node, int k, unsigned int lmd){
+    if(node == nullptr){
+        return nullptr;
+    }
     if(node->k == 0 && node->lmd == 0){
         return nullptr;
     }

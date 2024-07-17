@@ -161,10 +161,15 @@ int main(int argc, char* argv[]){
     }
 
     if(method == "core"){
-        
+
+        auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
         coreNodeP* node = tree.getNode();
-        FCTreeBuilderCoreParallel::Execute(mg, tree, id2vtx);
+        FCTreeBuilderCoreParallel::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
 
     }
 

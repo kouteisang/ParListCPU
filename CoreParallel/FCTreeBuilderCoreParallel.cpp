@@ -5,18 +5,118 @@
 FCTreeBuilderCoreParallel::~FCTreeBuilderCoreParallel(){
 }
 
-// Useful common method
-bool FCTreeBuilderCoreParallel::check(uint **degs, uint u, uint k, uint lmd, uint n_layers){
+
+
+// TODO: The following method has bug, please do not use this function
+uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e, bool serial){
+    uint n_vertex = mg.GetN(); // number of vertex
+    uint n_layers = mg.getLayerNumber();
     uint cnt = 0;
-    for(int l = 0; l < n_layers; l ++){
-        if(degs[u][l] >= k){
-            cnt += 1;
-            if(cnt >= lmd){
-                return true;
+    uint s = e, new_e = 0;
+    uint **adj_lst;
+
+    // Debug for test
+    // omp_set_num_threads(1);
+
+#pragma omp parallel private(cnt) shared(cnts, k, lmd, n_vertex)
+{
+    uint tid = omp_get_thread_num();
+    uint maxthreads = omp_get_num_threads();
+
+    for(int v = tid; v < n_vertex; v += maxthreads){
+        cnt = 0;
+        if(valid[v] != 1){
+            cnts[v] = 0;
+            continue; // only process the valid vertex
+        } 
+        for(int l = 0; l < n_layers; l ++){
+            if(degs[v][l] >= k){
+                cnt += 1;
             }
         }
+        cnts[v] = cnt;
+
+
+        if(cnts[v] < lmd){
+            valid[v] = 0;
+            int index;
+            #pragma omp atomic capture
+            index = e++;
+            invalid[index] = v;
+        }
     }
-    return false;
+}
+
+    new_e = e;
+    // cout << "new_e = " << new_e << endl;
+    uint vv;
+    while(s < e){
+
+#pragma omp parallel private(vv, adj_lst) shared(s, e, new_e, valid, invalid, degs, mg, cnts)
+{
+        #pragma omp for
+        for(uint j = s; j < e; j ++){
+            vv = invalid[j];
+            for(uint l = 0; l < n_layers; l ++){
+                adj_lst = mg.GetGraph(l).GetAdjLst();
+                for(uint i = 1; i <= adj_lst[vv][0]; i ++){
+                    uint u = adj_lst[vv][i]; // the neighbourhood
+                    if(valid[u] != 1) continue; // only process if u is valid
+                    // minus one and return the old value
+                    auto originDeg = __sync_fetch_and_sub(&degs[u][l], 1);
+                    if(originDeg == k){
+                        if(valid[u] == 1 && !check(degs, u, k, lmd, n_layers)){
+                            #pragma omp critical
+                            {
+                                invalid[new_e] = u;  
+                                new_e ++;
+                            }
+                            valid[u] = 0;
+                            cnts[u] = 0;
+                        }    
+                    }
+                }
+            }
+        }
+        #pragma omp barrier
+}
+
+        s = e;
+        e = new_e;
+    }
+
+   
+    if(n_vertex - new_e > 0){
+        constructCore(node, k, lmd, new_e, n_vertex, n_layers, valid, invalid, degs, cnts, serial);
+    }else{
+        node = nullptr;
+    }
+   
+    return new_e;
+}
+
+
+// Useful common method
+bool FCTreeBuilderCoreParallel::check(uint **degs, uint u, uint k, uint lmd, uint n_layers){
+    
+    // #pragma omp parallel
+    // {
+
+        // #pragma omp single
+        // {
+            uint cnt_valid = 0;
+            for(int l = 0; l < n_layers; l ++){
+                if(degs[u][l] >= k){
+                    cnt_valid += 1;
+                    if(cnt_valid >= lmd){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        // }
+
+    // }
 }
 
 void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd, uint new_e, uint n_vertex, uint n_layer, bool* valid, uint* invalid, uint** degs, uint* cnts, bool serial){
@@ -48,7 +148,8 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
         memcpy(node->cnts, cnts, n_vertex * sizeof(uint));
     }
 
-    // cout << "k = " << node->k << " lmd = " << node->lmd << " length = " << node->length << endl;
+    // cout << "k = " << node->k << " lmd = " << node->lmd << " length = " << node->length << " new_e = " << node->e << endl;
+
 }
 
 // Parallel Peel Process
@@ -91,7 +192,7 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
     }
 }
     new_e = e;
-    
+    // cout << "new_e = " << new_e << endl;   
     uint vv;
     while(s < e){
 #pragma omp parallel private(vv, adj_lst) shared(s, e, new_e, valid, invalid, degs, cnts, mg)
@@ -137,93 +238,6 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
     return new_e;
 }
 
-bool FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts){
-    uint n_vertex = mg.GetN(); // number of vertex
-    uint n_layers = mg.getLayerNumber();
-    uint cnt = 0;
-    uint s = 0, e = 0, new_e = 0, old_e = 0;
-    uint **adj_lst;
-
-    // Debug for test
-    // omp_set_num_threads(1);
-
-#pragma omp parallel private(cnt) shared(cnts, k, lmd, n_vertex)
-{
-    uint tid = omp_get_thread_num();
-    uint maxthreads = omp_get_num_threads();
-
-    for(int v = tid; v < n_vertex; v += maxthreads){
-        cnt = 0;
-        if(valid[v] != 1){
-            continue; // only process the valid vertex
-        } 
-        for(int l = 0; l < n_layers; l ++){
-            if(degs[v][l] >= k){
-                cnt += 1;
-            }
-        }
-        cnts[v] = cnt;
-
-
-        if(cnts[v] < lmd){
-            valid[v] = 0;
-            int index;
-            #pragma omp atomic capture
-            index = e++;
-            invalid[index] = v;
-        }
-    }
-}
-
-    s = 0;
-    new_e = e;
-    
-    uint vv;
-    while(s < e){
-
-#pragma private(vv, adj_lst, u) shared(s, e, new_e, valid, invalid, degs, cnts, mg)
-{
-        #pragma omp for
-        for(uint j = s; j < e; j ++){
-            vv = invalid[j];
-            for(uint l = 0; l < n_layers; l ++){
-                adj_lst = mg.GetGraph(l).GetAdjLst();
-                for(uint i = 1; i <= adj_lst[vv][0]; i ++){
-                    uint u = adj_lst[vv][i]; // the neighbourhood
-                    if(valid[u] != 1) continue; // only process if u is valid
-                    // minus one and return the old value
-                    #pragma omp atomic
-                    degs[u][l] --;
-                    if(degs[u][l] == k-1){
-                        if(valid[u] == 1 && !check(degs, u, k, lmd, n_layers)){
-                            #pragma omp critical
-                            {
-                                invalid[new_e] = u;  
-                                new_e ++;
-                            }
-                            valid[u] = 0;
-                        }    
-                    }
-                }
-            }
-        }
-        #pragma omp barrier
-}
-
-        s = e;
-        e = new_e;
-    }
-
-   
-    uint res_count = 0;
-    for(int i = 0; i < n_vertex; i ++){
-        if(valid[i] == 1){
-            res_count ++;
-        }
-    }
-
-}
-
 void FCTreeBuilderCoreParallel::PathSerial(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e){
 
    uint n_vertex = mg.GetN(); // number of vertex
@@ -250,6 +264,7 @@ void FCTreeBuilderCoreParallel::PathByK(MultilayerGraph &mg, uint **degs, uint k
     
 
     uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, e, false);
+
     // means the (k, lambda)-constaint has the valid vertex
     if(n_vertex - new_e > 0){
         k += 1;
@@ -268,8 +283,12 @@ void FCTreeBuilderCoreParallel::BuildSubFCTree(FCCoreTree &tree, MultilayerGraph
 
     uint n_vertex = mg.GetN(); // number of vertex
 
-
+    auto start_time_serial = omp_get_wtime(); 
     PathSerial(mg, degs, k, lmd, node, valid, invalid, cnts, 0);
+    auto end_time_serial = omp_get_wtime(); 
+
+    double elapsed_time_serial = end_time_serial - end_time_serial;
+    std::cout << "Core Parallel Serial part Elapsed time: " << elapsed_time_serial << " seconds\n";
 
 
     coreNodeP* root = tree.getNode();
@@ -282,7 +301,6 @@ void FCTreeBuilderCoreParallel::BuildSubFCTree(FCCoreTree &tree, MultilayerGraph
 
             root = root->right;
     }
-    
 
 }
 
@@ -332,8 +350,6 @@ void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree){
     delete[] degs;
 
 }
-
-
 
 
 // Mix path parallel and Core strategy together

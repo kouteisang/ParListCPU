@@ -230,13 +230,7 @@ void FCTreeBuilderPathParallelBylmd::PathParallel(MultilayerGraph &mg, coreNode 
         PathParallel(mg, leftChild, degs, pos, core, new_e);
     }else{
         node->left = nullptr;
-    }  
-
-
-    
-    
-
-    
+    }   
 
 }
 
@@ -244,12 +238,6 @@ void FCTreeBuilderPathParallelBylmd::PathParallel(MultilayerGraph &mg, coreNode 
 
 void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
 
-    int total_threads = omp_get_max_threads();
-    omp_set_num_threads(total_threads);
-
-    // coreNode* node = tree.getNode();
-
-        
     uint count = 0;
     uint n_vertex = mg.GetN(); // number of vertex
     uint n_layers = mg.getLayerNumber();
@@ -260,6 +248,8 @@ void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
     // Parallel the degs part
     #pragma omp parallel
     {
+        int tid = omp_get_thread_num();
+        // cout << "tid? = " << tid << endl;
         #pragma omp for schedule(static)
         for(int v = 0; v < n_vertex; v ++){
              degs[v] = new uint[n_layers];
@@ -302,6 +292,7 @@ void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
     double elapsed_time_serial = end_time - start_time;
     std::cout << "Pathlmd elapsed_time_serial Elapsed time: " << elapsed_time_serial << " seconds\n";
 
+    uint lmdCount = 0;
 // Path parallel
 #pragma omp parallel
 {
@@ -309,6 +300,7 @@ void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
     {
         coreNode* root = tree.getNode();
         while(root != nullptr && root->k != 0){
+            lmdCount ++;
             #pragma omp task
             {
                 PathParallel(mg, root, root->degs, root->o_pos, root->o_core, root->e);
@@ -320,6 +312,7 @@ void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
     }
 }
 
+cout << "lmdCount = " << lmdCount << endl;
 //// Path parallel serial version
     // coreNode* root = tree.getNode();
     // while(root != nullptr && root->k != 0){

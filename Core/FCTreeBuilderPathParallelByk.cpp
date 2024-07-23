@@ -244,9 +244,6 @@ void FCTreeBuilderPathParallelByk::PathParallel(MultilayerGraph &mg, coreNode *n
 
 void FCTreeBuilderPathParallelByk::Execute(MultilayerGraph &mg, FCTree &tree){
 
-    int total_threads = omp_get_max_threads();
-    omp_set_num_threads(total_threads);
-
     // coreNode* node = tree.getNode();
 
         
@@ -295,9 +292,14 @@ void FCTreeBuilderPathParallelByk::Execute(MultilayerGraph &mg, FCTree &tree){
     //    (2, 1)(1, 2)
     // (3, 1)  (2, 2)  (1, 3)
     // (1, 1), (2, 1), (3, 1)  Path serial
+    auto start_time_serial = omp_get_wtime();
     PathSerial(mg, klmd, degs, node, core, pos, e, count); 
+    auto end_time_serial = omp_get_wtime(); 
 
+    double elapsed_time_serial = end_time_serial - start_time_serial;
+    std::cout << "Pathlmd elapsed_time_serial Elapsed time: " << elapsed_time_serial << " seconds\n";   
 
+    uint kCount = 0;
 // Path parallel
 #pragma omp parallel
 {
@@ -305,6 +307,7 @@ void FCTreeBuilderPathParallelByk::Execute(MultilayerGraph &mg, FCTree &tree){
     {
         coreNode* root = tree.getNode();
         while(root != nullptr && root->k != 0){
+            kCount ++;
             #pragma omp task
             {
                 PathParallel(mg, root, root->degs, root->o_pos, root->o_core, root->e);
@@ -315,6 +318,8 @@ void FCTreeBuilderPathParallelByk::Execute(MultilayerGraph &mg, FCTree &tree){
 
     }
 }
+
+    cout << "k count = " << kCount << endl;
 
 //// Path parallel serial version
     // coreNode* root = tree.getNode();

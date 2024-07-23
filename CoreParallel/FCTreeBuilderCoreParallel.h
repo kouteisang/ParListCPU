@@ -23,7 +23,7 @@ public:
     // Core Parallel to Peel invalid vertex
     static uint PeelInvalidInParallelByCount(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e, bool serial);
 
-    static bool PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts);
+    static uint PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e, bool serial);
 
     // useful common method
     static bool check(uint **degs, uint u, uint k, uint lmd, uint n_layers);

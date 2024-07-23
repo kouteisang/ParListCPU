@@ -11,6 +11,7 @@
 #include "CoreParallel/FCTreeBuilderCoreParallel.h"
 
 #include "header.h"
+#include "Util/MemoryUtils.h"
 
 int main(int argc, char* argv[]){
 
@@ -105,6 +106,8 @@ int main(int argc, char* argv[]){
 
     if(method == "pathk"){
         
+        int total_threads = omp_get_max_threads();
+        omp_set_num_threads(total_threads);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
         FCTreeBuilderPathParallelByk::Execute(mg, tree);
@@ -130,6 +133,12 @@ int main(int argc, char* argv[]){
 
     if(method == "pathlmd"){
         
+        omp_set_num_threads(8);
+        // #pragma omp parallel
+        // {
+        //     int tid = omp_get_thread_num();
+        //     cout << "tid = " << tid << endl;
+        // }
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
         FCTreeBuilderPathParallelBylmd::Execute(mg, tree);
@@ -161,7 +170,7 @@ int main(int argc, char* argv[]){
     }
 
     if(method == "core"){
-
+        omp_set_num_threads(8);
         auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
         coreNodeP* node = tree.getNode();
@@ -170,10 +179,12 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "Pathlmd Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
-
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << "MB" << endl;
     }
 
     if(method == "mix"){
+        omp_set_num_threads(8);
         omp_set_max_active_levels(2); // Enable nested parallelism
         auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
@@ -182,8 +193,7 @@ int main(int argc, char* argv[]){
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
-        std::cout << "Pathlmd Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
-
+        std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
     }
 
 }

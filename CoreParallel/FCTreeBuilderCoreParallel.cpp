@@ -16,7 +16,6 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg
     uint **adj_lst;
 
     // Debug for test
-    // omp_set_num_threads(1);
 
 #pragma omp parallel private(cnt) shared(cnts, k, lmd, n_vertex)
 {

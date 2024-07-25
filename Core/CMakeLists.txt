@@ -3,3 +3,7 @@ add_library(CoreLib FCTreeBuilder.cpp FCTreeDFS.cpp FCTree.cpp FCTreeBuilderPath
 
 # 包含目录
 target_include_directories(CoreLib PUBLIC ${CMAKE_SOURCE_DIR})
+
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(CoreLib PUBLIC OpenMP::OpenMP_CXX)
+endif()

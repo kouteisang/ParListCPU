@@ -20,6 +20,7 @@ int main(int argc, char* argv[]){
     int order = 0;
     uint k = 0;
     uint lmd = 0;
+    uint num_thread = 1;
 
     for(int i = 1; i < argc; i ++){
         string arg = argv[i];
@@ -37,6 +38,9 @@ int main(int argc, char* argv[]){
         }
         if(arg == "-lmd" && i + 1 < argc){
             lmd = std::atoi(argv[++i]);
+        }
+        if(arg == "-num_thread" && i+1 < argc){
+            num_thread = std::atoi(argv[++i]);
         }
     }
 
@@ -76,7 +80,8 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "Serial Elapsed time: " << elapsed_time << " seconds\n";
-
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
 
         // This part to get the output
         if(k != 0 && lmd != 0){
@@ -100,19 +105,22 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "DFS Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
  
     }
 
 
     if(method == "pathk"){
         
-        int total_threads = omp_get_max_threads();
-        omp_set_num_threads(total_threads);
+        omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
         FCTreeBuilderPathParallelByk::Execute(mg, tree);
         auto end_time = omp_get_wtime(); 
-        
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
+
         double elapsed_time = end_time - start_time;
         std::cout << "Pathk Parallel Elapsed time: " << elapsed_time << " seconds\n";
 
@@ -133,12 +141,7 @@ int main(int argc, char* argv[]){
 
     if(method == "pathlmd"){
         
-        omp_set_num_threads(8);
-        // #pragma omp parallel
-        // {
-        //     int tid = omp_get_thread_num();
-        //     cout << "tid = " << tid << endl;
-        // }
+        omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
         FCTreeBuilderPathParallelBylmd::Execute(mg, tree);
@@ -146,6 +149,8 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
 
          // This part to get the output
         if(k != 0 && lmd != 0){
@@ -160,17 +165,17 @@ int main(int argc, char* argv[]){
         }
         
         // For test use only
-        for(int l = 1; l < mg.getLayerNumber(); l ++){
-            uint num_valid = 0;
-            tree.getNumValidRight(tree.getNode(), l, num_valid);
-            cout << "when lmd = " << l << " k max = " << num_valid << endl;
-        }
+        // for(int l = 1; l < mg.getLayerNumber(); l ++){
+        //     uint num_valid = 0;
+        //     tree.getNumValidRight(tree.getNode(), l, num_valid);
+        //     cout << "when lmd = " << l << " k max = " << num_valid << endl;
+        // }
 
 
     }
 
     if(method == "core"){
-        omp_set_num_threads(8);
+        omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
         coreNodeP* node = tree.getNode();
@@ -179,12 +184,13 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "Pathlmd Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
         long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << "MB" << endl;
+        cout << "mem = " << mem << " MB" << endl;
     }
 
     if(method == "mix"){
-        omp_set_num_threads(8);
+        omp_set_num_threads(num_thread);
         omp_set_max_active_levels(2); // Enable nested parallelism
         auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
@@ -194,6 +200,9 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
     }
 
 }

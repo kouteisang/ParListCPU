@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <omp.h>
-
+#include <cstring>
 
 using std::string;
 using std::ofstream;

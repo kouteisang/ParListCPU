@@ -17,7 +17,8 @@ dataset(-d):
 - sacchcere
 - so
 - wiki
-
+- dblp-coauthor
+- flickr-growth
 
 method(-m):
 
@@ -27,11 +28,9 @@ method(-m):
 - pathlmd (path level parallization by lmd)
 - core (core level parallization)
 
-order(-o):
+num_thread(-t): 
 
-- 0 stand for (0, 1, 2, 3, 4 ...) default order
-- 1 stand for numbe of edges from large to small
-- 2 stand for number of edges from small to large
+Number of thread going to use 
 
 k(-k), only in the serial, parallel version can use:
 

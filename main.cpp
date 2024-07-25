@@ -2,6 +2,8 @@
 
 #include "Graph/MultilayerGraph.h"
 #include "Core/FCTreeBuilder.h"
+#include "Core/FCTreeBuilderLeft.h"
+
 #include "Core/FCTreeDFS.h"
 #include "Core/FCTree.h"
 #include "Core/FCTreeBuilderPathParallelByk.h"
@@ -9,6 +11,7 @@
 
 #include "CoreParallel/FCCoreTree.cpp"
 #include "CoreParallel/FCTreeBuilderCoreParallel.h"
+#include "CoreParallel/FCTreeBuilderCoreParallelByK.h"
 
 #include "header.h"
 #include "Util/MemoryUtils.h"
@@ -98,6 +101,19 @@ int main(int argc, char* argv[]){
 
     }
 
+    if(method == "serialLeft"){
+
+        auto start_time = omp_get_wtime(); 
+        FCTree tree(1, 1, mg.GetN());
+        FCTreeBuilderLeft::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Serial Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl; 
+    }
+
     if(method == "dfs"){
         auto start_time = omp_get_wtime();
         FCTreeDFS::Execute(mg);
@@ -183,10 +199,25 @@ int main(int argc, char* argv[]){
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
-        std::cout << "Pathlmd Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+        std::cout << "Path left Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
 
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;
+    }
+
+    if(method == "corek"){
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime(); 
+        FCCoreTree tree(1, 1, mg.GetN());
+        coreNodeP* node = tree.getNode();
+        FCTreeBuilderCoreParallelByK::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+
+        double elapsed_time = end_time - start_time;
+        std::cout << "Path right Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl; 
     }
 
     if(method == "mix"){
@@ -204,5 +235,22 @@ int main(int argc, char* argv[]){
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;
     }
+
+    if(method == "mixr"){
+        omp_set_num_threads(num_thread);
+        omp_set_max_active_levels(2); // Enable nested parallelism
+        auto start_time = omp_get_wtime(); 
+        FCCoreTree tree(1, 1, mg.GetN());
+        coreNodeP* node = tree.getNode();
+        FCTreeBuilderCoreParallelByK::ExecuteMix(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
+    }
+
 
 }

@@ -1,11 +1,11 @@
-#include "FCTreeBuilder.h"
+#include "FCTreeBuilderRight.h"
 
-FCTreeBuilder::~FCTreeBuilder(){
+FCTreeBuilderRight::~FCTreeBuilderRight(){
 }
 
 // ========== Common method ==========
 
-bool FCTreeBuilder::check(uint **degs, uint u, uint *klmd, uint n_layers){
+bool FCTreeBuilderRight::check(uint **degs, uint u, uint *klmd, uint n_layers){
     uint k = klmd[0];
     uint lmd = klmd[1];
     uint cnt = 0;
@@ -20,7 +20,7 @@ bool FCTreeBuilder::check(uint **degs, uint u, uint *klmd, uint n_layers){
     return false;
 }
 
-uint FCTreeBuilder::peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint s, uint e){
+uint FCTreeBuilderRight::peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint s, uint e){
 
     uint n_layers = mg.getLayerNumber();
     uint old_s = s;
@@ -67,7 +67,7 @@ uint FCTreeBuilder::peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *cor
 
 }
 
-void FCTreeBuilder::restore(MultilayerGraph &mg, uint **degs, uint *core, uint old_e, uint new_e){
+void FCTreeBuilderRight::restore(MultilayerGraph &mg, uint **degs, uint *core, uint old_e, uint new_e){
 
     uint n_layers = mg.getLayerNumber();
     uint **adj_lst;
@@ -86,7 +86,7 @@ void FCTreeBuilder::restore(MultilayerGraph &mg, uint **degs, uint *core, uint o
     } 
 }
 
-void FCTreeBuilder::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
+void FCTreeBuilderRight::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
     cout << "( ";
     cout << " k = " << klmd[0] << " ";
     cout << " lmd = " << klmd[1] << " ";
@@ -98,7 +98,7 @@ void FCTreeBuilder::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_ve
     cout << endl;
 }
 
-void FCTreeBuilder::constructCore(uint *klmd, uint *core, uint new_e, uint n_vertex, coreNode *node){
+void FCTreeBuilderRight::constructCore(uint *klmd, uint *core, uint new_e, uint n_vertex, coreNode *node){
 
     // The node infor
     node->k = klmd[0];
@@ -111,7 +111,7 @@ void FCTreeBuilder::constructCore(uint *klmd, uint *core, uint new_e, uint n_ver
 
 // ========== The following build the tree structure to actually store the data ==========
 
-void FCTreeBuilder::Execute(MultilayerGraph &mg, FCTree &tree){
+void FCTreeBuilderRight::Execute(MultilayerGraph &mg, FCTree &tree){
     coreNode* node = tree.getNode();
 
         
@@ -154,7 +154,7 @@ void FCTreeBuilder::Execute(MultilayerGraph &mg, FCTree &tree){
    
 }
 
-void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count, coreNode* node){
+void FCTreeBuilderRight::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count, coreNode* node){
 
     uint s = e;
     uint old_e = e;
@@ -233,7 +233,7 @@ void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core,
 
 // ========== The following without building the tree structure to actually store the data ==========
 
-void FCTreeBuilder::Execute(MultilayerGraph &mg){
+void FCTreeBuilderRight::Execute(MultilayerGraph &mg){
     
     uint count = 0;
     uint n_vertex = mg.GetN(); // number of vertex
@@ -273,7 +273,7 @@ void FCTreeBuilder::Execute(MultilayerGraph &mg){
 
 }
 
-void FCTreeBuilder::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count){
+void FCTreeBuilderRight::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count){
 
     uint s = e;
     uint old_e = e;

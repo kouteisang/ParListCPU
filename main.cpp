@@ -1,20 +1,28 @@
 
 
 #include "Graph/MultilayerGraph.h"
-#include "Core/FCTreeBuilder.h"
+#include "Core/FCTree.h"
+#include "header.h"
+#include "Util/MemoryUtils.h"
+
+// serial
+#include "Core/FCTreeBuilderRight.h"
 #include "Core/FCTreeBuilderLeft.h"
 
+// dfs
 #include "Core/FCTreeDFS.h"
-#include "Core/FCTree.h"
+
+// path level
 #include "Core/FCTreeBuilderPathParallelByk.h"
 #include "Core/FCTreeBuilderPathParallelBylmd.h"
 
+// core level
 #include "CoreParallel/FCCoreTree.cpp"
 #include "CoreParallel/FCTreeBuilderCoreParallel.h"
 #include "CoreParallel/FCTreeBuilderCoreParallelByK.h"
 
-#include "header.h"
-#include "Util/MemoryUtils.h"
+//todo path level
+#include "Core/FCPathLevelLeft.h"
 
 int main(int argc, char* argv[]){
 
@@ -70,15 +78,14 @@ int main(int argc, char* argv[]){
     ll_uint *id2vtx = new ll_uint[mg.GetN()];
     mg.LoadId2VtxMap(id2vtx);
 
-
-    if(method == "serial"){
+    if(method == "serialRight"){
         auto start_time = omp_get_wtime();
         // This method simply traverse the tree
         // FCTreeBuilder::Execute(mg);
 
         // This method get the result and store the result in the tree
         FCTree tree(1, 1, mg.GetN());
-        FCTreeBuilder::Execute(mg, tree);
+        FCTreeBuilderRight::Execute(mg, tree);
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
@@ -126,6 +133,30 @@ int main(int argc, char* argv[]){
  
     }
 
+    if(method == "pathlevelLeft"){
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();
+        FCTree tree(1, 1, mg.GetN());
+        FCPathLevelLeft::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
+
+         // This part to get the output
+        if(k != 0 && lmd != 0){
+            k = uint(k);
+            lmd = uint(lmd);
+            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+            if(res_node == nullptr){
+                cout << "No statisfy result" << endl;
+            }else{
+                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
+            }
+        }
+    }
 
     if(method == "pathk"){
         
@@ -251,6 +282,5 @@ int main(int argc, char* argv[]){
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;
     }
-
 
 }

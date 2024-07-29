@@ -1,15 +1,15 @@
-#ifndef FCTreeBuilder_H
-#define FCTreeBuilder_H
+#ifndef FCTreeBuilderRight_H
+#define FCTreeBuilderRight_H
 
 #include "Graph/MultilayerGraph.h"
 #include "Core/FCTree.h"
 
-class FCTreeBuilder{
+class FCTreeBuilderRight{
 private:
     /* data */
 public:
-    FCTreeBuilder(/* args */);
-    ~FCTreeBuilder();
+    FCTreeBuilderRight(/* args */);
+    ~FCTreeBuilderRight();
 
     static void Execute(MultilayerGraph &mg);
 

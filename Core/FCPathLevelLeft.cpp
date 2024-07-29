@@ -1,12 +1,13 @@
-#include "FCTreeBuilderPathParallelBylmd.h"
-// #include "FCTree.h"
+#include "FCPathLevelLeft.h"
 
-FCTreeBuilderPathParallelBylmd::~FCTreeBuilderPathParallelBylmd(){
+FCPathLevelLeft::~FCPathLevelLeft(){
 }
+
+
 
 // ==========common method==========
 
-void FCTreeBuilderPathParallelBylmd::constructCore(uint** degs, uint *klmd, uint *pos, uint *core, uint n_vertex, uint n_layer, coreNode *node, uint new_e, bool serial){
+void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *core, uint n_vertex, uint n_layer, coreNode *node, uint new_e, bool serial){
 
     // The node infor
     node->e = new_e; 
@@ -37,7 +38,7 @@ void FCTreeBuilderPathParallelBylmd::constructCore(uint** degs, uint *klmd, uint
     }
 }
 
-void FCTreeBuilderPathParallelBylmd::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
+void FCPathLevelLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
     cout << "( ";
     cout << " k = " << klmd[0] << " ";
     cout << " lmd = " << klmd[1] << " ";
@@ -49,7 +50,7 @@ void FCTreeBuilderPathParallelBylmd::PrintCoreInfor(uint *klmd, uint *core, uint
     cout << endl;
 }
 
-bool FCTreeBuilderPathParallelBylmd::check(uint **degs, uint u, uint* klmd, uint n_layers){
+bool FCPathLevelLeft::check(uint **degs, uint u, uint* klmd, uint n_layers){
     uint k = klmd[0];
     uint lmd = klmd[1];
     uint cnt = 0;
@@ -64,7 +65,7 @@ bool FCTreeBuilderPathParallelBylmd::check(uint **degs, uint u, uint* klmd, uint
     return false;
 }
 
-uint FCTreeBuilderPathParallelBylmd::peel(MultilayerGraph &mg, uint **degs, uint* klmd, uint *core, uint *pos, uint s, uint e){
+uint FCPathLevelLeft::peel(MultilayerGraph &mg, uint **degs, uint* klmd, uint *core, uint *pos, uint s, uint e){
 
     uint n_layers = mg.getLayerNumber();
     uint old_s = s;
@@ -109,7 +110,7 @@ uint FCTreeBuilderPathParallelBylmd::peel(MultilayerGraph &mg, uint **degs, uint
 
 // ==========Path Serial==========
 
-void FCTreeBuilderPathParallelBylmd::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, coreNode *node, uint *core, uint *pos, uint e, uint &count){
+void FCPathLevelLeft::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, coreNode *node, uint *core, uint *pos, uint e, uint &count){
     
     uint s = e;
     uint old_e = e;
@@ -160,6 +161,11 @@ void FCTreeBuilderPathParallelBylmd::PathSerial(MultilayerGraph& mg, uint *klmd,
     } 
 
     if(n_vertex - new_e > 0 && klmd[0] == 1){
+
+        #pragma omp task shared(mg), firstprivate(node)
+        {
+            PathParallel(mg, node, node->degs, node->o_pos, node->o_core, node->e);
+        }
         coreNode* rightChild = new coreNode();
         node->right = rightChild;
 
@@ -171,9 +177,15 @@ void FCTreeBuilderPathParallelBylmd::PathSerial(MultilayerGraph& mg, uint *klmd,
 }
 
 
+void FCPathLevelLeft::PathParallelTest(MultilayerGraph &mg, coreNode *node){
+    
+   cout << "This is test" << omp_get_thread_num() << endl;
+}
+
+
 // ==========Path Parallel==========
 
-void FCTreeBuilderPathParallelBylmd::PathParallel(MultilayerGraph &mg, coreNode *node, uint** degs, uint *pos, uint *core, uint e){
+void FCPathLevelLeft::PathParallel(MultilayerGraph &mg, coreNode *node, uint** degs, uint *pos, uint *core, uint e){
     
     uint old_pos_v;
     uint s = e;
@@ -236,7 +248,7 @@ void FCTreeBuilderPathParallelBylmd::PathParallel(MultilayerGraph &mg, coreNode 
 
 // ==========Execute==========
 
-void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
+void FCPathLevelLeft::Execute(MultilayerGraph &mg, FCTree &tree){
 
     uint count = 0;
     uint n_vertex = mg.GetN(); // number of vertex
@@ -285,48 +297,26 @@ void FCTreeBuilderPathParallelBylmd::Execute(MultilayerGraph &mg, FCTree &tree){
     //    (2, 1)(1, 2)
     // (3, 1)  (2, 2)  (1, 3)
     // (1, 1), (2, 1), (3, 1)  Path serial
-    auto start_time = omp_get_wtime();
-    PathSerial(mg, klmd, degs, node, core, pos, e, count); 
-    auto end_time = omp_get_wtime(); 
 
-    double elapsed_time_serial = end_time - start_time;
-    std::cout << "Pathlmd elapsed_time_serial Elapsed time: " << elapsed_time_serial << " seconds\n";
-
-    uint lmdCount = 0;
-// Path parallel
-#pragma omp parallel
-{
-    #pragma omp single
+    auto start_time_all = omp_get_wtime(); 
+    #pragma omp parallel
     {
-        coreNode* root = tree.getNode();
-        while(root != nullptr && root->k != 0){
-            lmdCount ++;
-            #pragma omp task
-            {
-                PathParallel(mg, root, root->degs, root->o_pos, root->o_core, root->e);
-            }
-            root = root->right;
+        #pragma omp single
+        {
+            PathSerial(mg, klmd, degs, node, core, pos, e, count); 
         }
         #pragma omp taskwait
-
     }
-}
+    auto end_time_all = omp_get_wtime(); 
+    double elapsed_time_all = end_time_all - start_time_all;
+    std::cout << "Serial Elapsed time: " << elapsed_time_all << " seconds\n";
 
-cout << "lmdCount = " << lmdCount << endl;
-//// Path parallel serial version
     // coreNode* root = tree.getNode();
     // while(root != nullptr && root->k != 0){
     //     PathParallel(mg, root, root->degs, root->o_pos, root->o_core, root->e);
-    //     root = root->left;
+    //     root = root->right;
     // }
 
-    //
-    //Test to traversal 
-    // uint totalCount = 0;
-    // // tree.traversal(tree.getNode(), totalCount);
-    // cout << "totalCount = " << totalCount << endl;
-
-   
 
     // Free the memory
     for (uint i = 0; i < n_vertex; i++) delete[] degs[i];

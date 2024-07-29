@@ -1,15 +1,15 @@
-#ifndef FCPATHLEVELLEFT_H
-#define FCPATHLEVELLEFT_H
+#ifndef FCPATHLEVELRIGHT_H
+#define FCPATHLEVELRIGHT_H
 
 #include "Graph/MultilayerGraph.h"
 #include "Core/FCTree.h"
 
-class FCPathLevelLeft{
+class FCPathLevelRight{
 private:
     /* data */
 public:
-    FCPathLevelLeft(/* args */);
-    ~FCPathLevelLeft();
+    FCPathLevelRight(/* args */);
+    ~FCPathLevelRight();
 
      static void Execute(MultilayerGraph &mg, FCTree &tree);
     // ========= Common Method ========

@@ -1,13 +1,13 @@
-#include "FCPathLevelLeft.h"
+#include "FCPathLevelRight.h"
 
-FCPathLevelLeft::~FCPathLevelLeft(){
+FCPathLevelRight::~FCPathLevelRight(){
 }
 
 
 
 // ==========common method==========
 
-void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *core, uint n_vertex, uint n_layer, coreNode *node, uint new_e, bool serial){
+void FCPathLevelRight::constructCore(uint** degs, uint *klmd, uint *pos, uint *core, uint n_vertex, uint n_layer, coreNode *node, uint new_e, bool serial){
 
     // The node infor
     node->e = new_e; 
@@ -38,7 +38,7 @@ void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *co
     }
 }
 
-void FCPathLevelLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
+void FCPathLevelRight::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
     cout << "( ";
     cout << " k = " << klmd[0] << " ";
     cout << " lmd = " << klmd[1] << " ";
@@ -50,7 +50,7 @@ void FCPathLevelLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_
     cout << endl;
 }
 
-bool FCPathLevelLeft::check(uint **degs, uint u, uint* klmd, uint n_layers){
+bool FCPathLevelRight::check(uint **degs, uint u, uint* klmd, uint n_layers){
     uint k = klmd[0];
     uint lmd = klmd[1];
     uint cnt = 0;
@@ -65,7 +65,7 @@ bool FCPathLevelLeft::check(uint **degs, uint u, uint* klmd, uint n_layers){
     return false;
 }
 
-uint FCPathLevelLeft::peel(MultilayerGraph &mg, uint **degs, uint* klmd, uint *core, uint *pos, uint s, uint e){
+uint FCPathLevelRight::peel(MultilayerGraph &mg, uint **degs, uint* klmd, uint *core, uint *pos, uint s, uint e){
 
     uint n_layers = mg.getLayerNumber();
     uint old_s = s;
@@ -110,7 +110,7 @@ uint FCPathLevelLeft::peel(MultilayerGraph &mg, uint **degs, uint* klmd, uint *c
 
 // ==========Path Serial==========
 
-void FCPathLevelLeft::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, coreNode *node, uint *core, uint *pos, uint e, uint &count){
+void FCPathLevelRight::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, coreNode *node, uint *core, uint *pos, uint e, uint &count){
     
     uint s = e;
     uint old_e = e;
@@ -160,27 +160,26 @@ void FCPathLevelLeft::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, c
         node->length = 0; 
     } 
 
-    if(n_vertex - new_e > 0 && klmd[0] == 1){
+    if(n_vertex - new_e > 0 && klmd[1] == 1){
 
         #pragma omp task shared(mg), firstprivate(node)
         {
             PathParallel(mg, node, node->degs, node->o_pos, node->o_core, node->e);
         }
-        coreNode* rightChild = new coreNode();
-        node->right = rightChild;
+        coreNode* leftChild = new coreNode();
+        node->left = leftChild;
 
-        klmd[1] += 1;
-        PathSerial(mg, klmd, degs, rightChild, core, pos, new_e, count);
+        klmd[0] += 1;
+        PathSerial(mg, klmd, degs, leftChild, core, pos, new_e, count);
 
     }
 
 }
 
 
-
 // ==========Path Parallel==========
 
-void FCPathLevelLeft::PathParallel(MultilayerGraph &mg, coreNode *node, uint** degs, uint *pos, uint *core, uint e){
+void FCPathLevelRight::PathParallel(MultilayerGraph &mg, coreNode *node, uint** degs, uint *pos, uint *core, uint e){
     
     uint old_pos_v;
     uint s = e;
@@ -193,8 +192,8 @@ void FCPathLevelLeft::PathParallel(MultilayerGraph &mg, coreNode *node, uint** d
     uint k = node->k;
     uint lmd = node->lmd;
     uint klmd[2];
-    klmd[0] = k+1;
-    klmd[1] = lmd;
+    klmd[0] = k;
+    klmd[1] = lmd+1;
 
 
     // cout << "n_vertex = " << n_vertex << endl;
@@ -230,20 +229,20 @@ void FCPathLevelLeft::PathParallel(MultilayerGraph &mg, coreNode *node, uint** d
     }
 
    if(n_vertex - new_e > 0){
-        coreNode* leftChild = new coreNode();
-        node->left = leftChild;
+        coreNode* rightChild = new coreNode();
+        node->right = rightChild;
         // PrintCoreInfor(klmd, core, new_e, n_vertex); 
-        constructCore(degs, klmd, pos, core, n_vertex, n_layer, leftChild, new_e, false);
-        PathParallel(mg, leftChild, degs, pos, core, new_e);
+        constructCore(degs, klmd, pos, core, n_vertex, n_layer, rightChild, new_e, false);
+        PathParallel(mg, rightChild, degs, pos, core, new_e);
     }else{
-        node->left = nullptr;
+        node->right = nullptr;
     }   
 
 }
 
 // ==========Execute==========
 
-void FCPathLevelLeft::Execute(MultilayerGraph &mg, FCTree &tree){
+void FCPathLevelRight::Execute(MultilayerGraph &mg, FCTree &tree){
 
     uint count = 0;
     uint n_vertex = mg.GetN(); // number of vertex
@@ -301,13 +300,6 @@ void FCPathLevelLeft::Execute(MultilayerGraph &mg, FCTree &tree){
         }
         #pragma omp taskwait
     }
-
-    // coreNode* root = tree.getNode();
-    // while(root != nullptr && root->k != 0){
-    //     PathParallel(mg, root, root->degs, root->o_pos, root->o_core, root->e);
-    //     root = root->right;
-    // }
-
 
     // Free the memory
     for (uint i = 0; i < n_vertex; i++) delete[] degs[i];

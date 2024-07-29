@@ -5,12 +5,16 @@
 #include "header.h"
 #include "Util/MemoryUtils.h"
 
+// Naive
+#include "Core/FCTreeDFS.h"
+
 // serial
 #include "Core/FCTreeBuilderRight.h"
 #include "Core/FCTreeBuilderLeft.h"
 
-// dfs
-#include "Core/FCTreeDFS.h"
+// new path level
+#include "Core/FCPathLevelLeft.h"
+#include "Core/FCPathLevelRight.h"
 
 // path level
 #include "Core/FCTreeBuilderPathParallelByk.h"
@@ -21,8 +25,7 @@
 #include "CoreParallel/FCTreeBuilderCoreParallel.h"
 #include "CoreParallel/FCTreeBuilderCoreParallelByK.h"
 
-//todo path level
-#include "Core/FCPathLevelLeft.h"
+
 
 int main(int argc, char* argv[]){
 
@@ -78,7 +81,32 @@ int main(int argc, char* argv[]){
     ll_uint *id2vtx = new ll_uint[mg.GetN()];
     mg.LoadId2VtxMap(id2vtx);
 
-    if(method == "serialRight"){
+    if(method == "navie"){
+        auto start_time = omp_get_wtime();
+        FCTreeDFS::Execute(mg);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "DFS Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
+ 
+    }
+
+    if(method == "SerialLeft"){
+
+        auto start_time = omp_get_wtime(); 
+        FCTree tree(1, 1, mg.GetN());
+        FCTreeBuilderLeft::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Serial Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl; 
+    }
+
+    if(method == "SerialRight"){
         auto start_time = omp_get_wtime();
         // This method simply traverse the tree
         // FCTreeBuilder::Execute(mg);
@@ -108,32 +136,7 @@ int main(int argc, char* argv[]){
 
     }
 
-    if(method == "serialLeft"){
-
-        auto start_time = omp_get_wtime(); 
-        FCTree tree(1, 1, mg.GetN());
-        FCTreeBuilderLeft::Execute(mg, tree);
-        auto end_time = omp_get_wtime(); 
-        
-        double elapsed_time = end_time - start_time;
-        std::cout << "Serial Elapsed time: " << elapsed_time << " seconds\n";
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl; 
-    }
-
-    if(method == "dfs"){
-        auto start_time = omp_get_wtime();
-        FCTreeDFS::Execute(mg);
-        auto end_time = omp_get_wtime(); 
-        
-        double elapsed_time = end_time - start_time;
-        std::cout << "DFS Elapsed time: " << elapsed_time << " seconds\n";
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
- 
-    }
-
-    if(method == "pathlevelLeft"){
+    if(method == "PathLevelLeft"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
@@ -141,7 +144,32 @@ int main(int argc, char* argv[]){
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
-        std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
+        std::cout << "PathLevelLeft Elapsed time: " << elapsed_time << " seconds\n";
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
+
+         // This part to get the output
+        if(k != 0 && lmd != 0){
+            k = uint(k);
+            lmd = uint(lmd);
+            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+            if(res_node == nullptr){
+                cout << "No statisfy result" << endl;
+            }else{
+                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
+            }
+        }
+    }
+
+    if(method == "PathLevelRight"){
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();
+        FCTree tree(1, 1, mg.GetN());
+        FCPathLevelRight::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "PathLevelRight Elapsed time: " << elapsed_time << " seconds\n";
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;
 

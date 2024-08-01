@@ -35,8 +35,6 @@ public:
 
     static void BuildSubFCTreeMix(FCCoreTree &tree, MultilayerGraph &mg, uint **degs, uint *klmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts);
 
-    static void PathByKTask(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e);
-
     static void PathSerialMix(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e);
 
 };

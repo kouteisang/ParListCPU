@@ -354,29 +354,6 @@ void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree){
 
 // Mix path parallel and Core strategy together
 
-void FCTreeBuilderCoreParallel::PathByKTask(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e){
-    uint n_vertex = mg.GetN(); // number of vertex
-    uint n_layers = mg.getLayerNumber(); // number of layer
-    
-
-#pragma omp parallel
-{
-
-    #pragma omp single
-    {
-    uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, e, false);
-        // means the (k, lambda)-constaint has the valid vertex
-        if(n_vertex - new_e > 0){
-            k += 1;
-            coreNodeP* leftChild = new coreNodeP();
-            node->left = leftChild;
-            PathByK(mg, degs, k, lmd, leftChild, valid, invalid, cnts, new_e);
-        }
-    }
-}
-
-} 
-
 
 void FCTreeBuilderCoreParallel::PathSerialMix(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e){
 

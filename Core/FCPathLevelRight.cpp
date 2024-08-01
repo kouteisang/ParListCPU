@@ -152,7 +152,7 @@ void FCPathLevelRight::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, 
 
     if(n_vertex - new_e > 0){
         count ++;
-        // PrintCoreInfor(klmd, core, new_e, n_vertex);
+        PrintCoreInfor(klmd, core, new_e, n_vertex);
         constructCore(degs, klmd, pos, core, n_vertex, n_layer, node, new_e, true);
     }else{
         node->k = 0;
@@ -231,7 +231,7 @@ void FCPathLevelRight::PathParallel(MultilayerGraph &mg, coreNode *node, uint** 
    if(n_vertex - new_e > 0){
         coreNode* rightChild = new coreNode();
         node->right = rightChild;
-        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        PrintCoreInfor(klmd, core, new_e, n_vertex); 
         constructCore(degs, klmd, pos, core, n_vertex, n_layer, rightChild, new_e, false);
         PathParallel(mg, rightChild, degs, pos, core, new_e);
     }else{
@@ -291,7 +291,8 @@ void FCPathLevelRight::Execute(MultilayerGraph &mg, FCTree &tree){
     //    (2, 1)(1, 2)
     // (3, 1)  (2, 2)  (1, 3)
     // (1, 1), (2, 1), (3, 1)  Path serial
-
+        
+    // auto start_time_new = omp_get_wtime();
     #pragma omp parallel
     {
         #pragma omp single
@@ -300,6 +301,11 @@ void FCPathLevelRight::Execute(MultilayerGraph &mg, FCTree &tree){
         }
         #pragma omp taskwait
     }
+    // auto end_time_new = omp_get_wtime(); 
+
+    // double elapsed_time_new = end_time_new - start_time_new;
+    // cout << "elapsed_time_new = " << elapsed_time_new << endl;
+
 
     // Free the memory
     for (uint i = 0; i < n_vertex; i++) delete[] degs[i];

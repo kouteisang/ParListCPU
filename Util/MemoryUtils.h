@@ -1,7 +1,3 @@
-//
-// Created by ldd on 2023/6/6.
-//
-
 #ifndef MLCDEC_MEMORYUTILS_H
 #define MLCDEC_MEMORYUTILS_H
 

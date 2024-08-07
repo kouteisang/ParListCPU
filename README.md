@@ -1,12 +1,12 @@
-# fctree
-
-## To run the code
+## Compile the code
 
 ```
 cd Build
+cmake ..
 make
-./firmcore_baseline -d dataset -m method
 ```
+
+## Parameters
 
 dataset(-d):
 
@@ -19,25 +19,39 @@ dataset(-d):
 - wiki
 - dblp-coauthor
 - flickr-growth
+- amazon
 
 method(-m):
 
-- serial (FirmCore Tree based solution, including buiding the tree structure, i.e, FCTree)
-- dfs (dfs version, go through all the nodes)
-- pathk (path level parallization by k)
-- pathlmd (path level parallization by lmd)
-- core (core level parallization)
+- naive
+- OptimizedLeft
+- OptimizedRight
+- PathParallel
+- CoreParallel
 
-num_thread(-t): 
+num of thread (-num_thread)
 
-Number of thread going to use 
+Order of layer (-o)
 
-k(-k), only in the serial, parallel version can use:
+0: random order
+1: order by increasing the number of edge
+2: order by decreasing the number of edge
+3: order by increasing the graph density
+4: order by decreasing the graph density
 
-- k: specify the output k
 
-m(-m), only in the serial, parallel version can use:
 
-- lmd: specify the output lambda
+## example
 
-- core: each firmcore decomposition parallel
+To run the homo dataset with opimized left algorithm.
+
+```
+./firmcore_baseline -d homo -m OptimizedLeft
+```
+
+To run the homo dataset with pathparallel algorithm with 10 threads.
+
+```
+./firmcore_baseline -d homo -m PathParallel -num_thread 10
+```
+

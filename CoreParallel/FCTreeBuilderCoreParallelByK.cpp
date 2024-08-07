@@ -149,6 +149,10 @@ void FCTreeBuilderCoreParallelByK::PathSerial(MultilayerGraph &mg, uint **degs, 
    
    uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, e, true);
 
+   if(k == 10){
+        omp_set_num_threads(1);
+   }
+
    // means the (k, lambda)-constaint has the valid vertex
    if(n_vertex - new_e > 0){
         k += 1;
@@ -174,16 +178,16 @@ void FCTreeBuilderCoreParallelByK::BuildSubFCTree(FCCoreTree &tree, MultilayerGr
     std::cout << "Core Parallel Serial part Elapsed time: " << elapsed_time_serial << " seconds\n";
 
 
-    coreNodeP* root = tree.getNode();
+    // coreNodeP* root = tree.getNode();
 
-    while(root != nullptr && root->k != 0){
+    // while(root != nullptr && root->k != 0){
 
-            coreNodeP* rightChild = new coreNodeP();
-            root->right = rightChild;
-            PathBylmd(mg, root->degs, root->k, root->lmd+1, rightChild, root->valid, root->invalid, root->cnts, root->e); 
+    //         coreNodeP* rightChild = new coreNodeP();
+    //         root->right = rightChild;
+    //         PathBylmd(mg, root->degs, root->k, root->lmd+1, rightChild, root->valid, root->invalid, root->cnts, root->e); 
 
-            root = root->left;
-    }
+    //         root = root->left;
+    // }
 
 }
 

@@ -1,9 +1,3 @@
-// Reference: 
-// @article{liufast,
-//   title={Fast Multilayer Core Decomposition and Indexing},
-//   author={Liu, Dandan and Wang, Run-An and Zou, Zhaonian and Huang, Xin}
-// }
-
 #ifndef MULTILAYERGRAPH_H
 #define MULTILAYERGRAPH_H
 

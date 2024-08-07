@@ -24,7 +24,7 @@ void Graph::BuildFromEdgeLst(edge *edge_buf, uint num_of_vtx, uint num_of_edge){
     adj_lst = new uint *[n]; 
     adj_lst_buf = new uint [num_of_edge + n];
 
-    std::sort(edge_buf, edge_buf + num_of_edge); // 对边的大小进行排序
+    std::sort(edge_buf, edge_buf + num_of_edge); // sort by the edge size
 
 
     i = 0; // index of edge buf;

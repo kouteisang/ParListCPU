@@ -1,9 +1,3 @@
-// Reference: 
-// @article{liufast,
-//   title={Fast Multilayer Core Decomposition and Indexing},
-//   author={Liu, Dandan and Wang, Run-An and Zou, Zhaonian and Huang, Xin}
-// }
-
 
 #include "MultilayerGraph.h"
 
@@ -13,12 +7,40 @@ MultilayerGraph::~MultilayerGraph(){
 }
 
 void MultilayerGraph::SetGraphOrder(int o){
-    if (o == 0){
-        
-    }else if(o == 1){
-      
-    }else if(o == 2){
+    if(o == 0) return ;
+    if (o == 1 || o == 2) { // density increase = 1, density decrease = 2
 
+        float density[n_layers];
+        for (uint i = 0; i < n_layers; i++) {
+            density[i] = (float) (graph_layers[i].getM() >> 1) / (float) graph_layers[i].getN();
+        }
+
+        if (o == 1) {
+            std::sort(order, order + n_layers, [&density](uint id1, uint id2) { return density[id1] < density[id2]; });
+        } else {
+            std::sort(order, order + n_layers, [&density](uint id1, uint id2) { return density[id1] > density[id2]; });
+        }
+
+        cout << "Graph order set to: [ ";
+        for (uint i = 0; i < n_layers; i++) {
+            cout << "l" << order[i] << "(" << density[order[i]] << ") ";
+        }
+        cout << "]." << endl;
+
+    } else if (o == 3 || o == 4) { // number of edge increase = 3, number of edge decrease = 4
+
+        uint n_edges[n_layers];
+        for (uint i = 0; i < n_layers; i++) {
+            n_edges[i] = graph_layers[i].getM();
+        }
+
+        if (o == 3) {
+            std::sort(order, order + n_layers,
+                 [&n_edges](uint id1, uint id2) { return n_edges[id1] < n_edges[id2]; });
+        } else {
+            std::sort(order, order + n_layers,
+                 [&n_edges](uint id1, uint id2) { return n_edges[id1] > n_edges[id2]; });
+        }
     }
 }
 

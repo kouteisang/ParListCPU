@@ -31,6 +31,9 @@ void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *co
         memcpy(node->o_core, core, n_vertex * sizeof(uint));
         memcpy(node->o_pos, pos, n_vertex * sizeof(uint));
 
+        // node->core = new uint[node->length];
+        // memcpy(node->core, core + new_e, (n_vertex - new_e) * sizeof(uint));
+
         // for(uint i = 0; i < n_vertex; i ++){
         //     cout << node->o_pos[i] << " ";
         // }

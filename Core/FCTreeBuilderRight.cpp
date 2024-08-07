@@ -96,7 +96,7 @@ void FCTreeBuilderRight::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint
     //     cout << core[x] << " "; 
     // }
     // cout << endl;
-    // if(klmd[1] == 1){
+    if(klmd[1] == 1){
          cout << "( ";
         cout << " k = " << klmd[0] << " ";
         cout << " lmd = " << klmd[1] << " ";
@@ -107,7 +107,7 @@ void FCTreeBuilderRight::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint
             // cout << core[x] << " "; 
         // }
         cout << endl; 
-    // }
+    }
 }
 
 void FCTreeBuilderRight::constructCore(uint *klmd, uint *core, uint new_e, uint n_vertex, coreNode *node){
@@ -208,7 +208,7 @@ void FCTreeBuilderRight::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *
 
     if(n_vertex - new_e > 0){
         count ++;
-        PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
         constructCore(klmd, core, new_e, n_vertex, node);
     }else{
         node->k = 0;
@@ -327,7 +327,7 @@ void FCTreeBuilderRight::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *
 
     if(n_vertex - new_e > 0){
         count ++;
-        PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
         klmd[1] += 1;
         BuildSubFCTree(mg, degs, core, pos, klmd, new_e, count); 
         klmd[1] -= 1;

@@ -4,6 +4,7 @@
 #include "Core/FCTree.h"
 #include "header.h"
 #include "Util/MemoryUtils.h"
+#include "Util/KLmdUtils.h"
 
 // Naive
 #include "Core/FCTreeDFS.h"
@@ -27,7 +28,12 @@
 
 
 
+uint* getLmd(){
+
+}
+
 int main(int argc, char* argv[]){
+     
 
     string dataset = "example";
     string method = "serial";
@@ -93,11 +99,12 @@ int main(int argc, char* argv[]){
  
     }
 
-    if(method == "PathSerialLeft"){
+    if(method == "OptimizedLeft"){
 
         auto start_time = omp_get_wtime(); 
         FCTree tree(1, 1, mg.GetN());
         FCTreeBuilderLeft::Execute(mg, tree);
+        // FCTreeBuilderLeft::Execute(mg);
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
@@ -106,7 +113,7 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl; 
     }
 
-    if(method == "PathSerialRight"){
+    if(method == "OptimizedRight"){
         auto start_time = omp_get_wtime();
         // This method simply traverse the tree
         // FCTreeBuilder::Execute(mg);
@@ -136,7 +143,7 @@ int main(int argc, char* argv[]){
 
     }
 
-    if(method == "PathParallelLeft"){
+    if(method == "PathParallel"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
@@ -148,43 +155,37 @@ int main(int argc, char* argv[]){
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;
 
-         // This part to get the output
-        if(k != 0 && lmd != 0){
-            k = uint(k);
-            lmd = uint(lmd);
-            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
-            if(res_node == nullptr){
-                cout << "No statisfy result" << endl;
-            }else{
-                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
-            }
-        }
-    }
 
-    if(method == "PathParallelRight"){
-        omp_set_num_threads(num_thread);
-        auto start_time = omp_get_wtime();
-        FCTree tree(1, 1, mg.GetN());
-        FCPathLevelRight::Execute(mg, tree);
-        auto end_time = omp_get_wtime(); 
+
+         // This part to get the output
+        std::vector<int> ks = getK("/home/cheng/fctree/dataset/homo/k.txt");
+        std::vector<int> lmds = getLmd("/home/cheng/fctree/dataset/homo/lmd.txt");
+
+   
+        auto start_time_query = omp_get_wtime();
+        for(int i = 0; i < ks.size(); i ++){
+            uint k = uint(ks[i]);
+            uint lmd = uint(lmds[i]); 
+            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+            // cout << res_node->k << " " << res_node->lmd << " " << res_node->length << endl;
+        }
+        auto end_time_query = omp_get_wtime();
+        auto total_time_query = end_time_query - start_time_query;
+        cout << "total time query = "<< total_time_query << endl;
+        cout << "average time query = "<< total_time_query/ks.size() << endl;
         
-        double elapsed_time = end_time - start_time;
-        std::cout << "PathLevelRight Elapsed time: " << elapsed_time << " seconds\n";
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
-
-         // This part to get the output
-        if(k != 0 && lmd != 0){
-            k = uint(k);
-            lmd = uint(lmd);
-            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
-            if(res_node == nullptr){
-                cout << "No statisfy result" << endl;
-            }else{
-                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
-            }
-        }
+        // if(k != 0 && lmd != 0){
+        //     k = uint(k);
+        //     lmd = uint(lmd);
+        //     coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+        //     if(res_node == nullptr){
+        //         cout << "No statisfy result" << endl;
+        //     }else{
+        //         tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
+        //     }
+        // }
     }
+
 
     if(method == "CoreParallel"){
         omp_set_num_threads(num_thread);
@@ -201,114 +202,139 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl;
     }
 
-    if(method == "mix"){
-        omp_set_num_threads(num_thread);
-        omp_set_max_active_levels(2); // Enable nested parallelism
-        auto start_time = omp_get_wtime(); 
-        FCCoreTree tree(1, 1, mg.GetN());
-        coreNodeP* node = tree.getNode();
-        FCTreeBuilderCoreParallel::ExecuteMix(mg, tree);
-        auto end_time = omp_get_wtime(); 
+    // if(method == "PathParallelRight"){
+    //     omp_set_num_threads(num_thread);
+    //     auto start_time = omp_get_wtime();
+    //     FCTree tree(1, 1, mg.GetN());
+    //     FCPathLevelRight::Execute(mg, tree);
+    //     auto end_time = omp_get_wtime(); 
         
-        double elapsed_time = end_time - start_time;
-        std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "PathLevelRight Elapsed time: " << elapsed_time << " seconds\n";
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl;
 
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
-    }
+    //      // This part to get the output
+    //     if(k != 0 && lmd != 0){
+    //         k = uint(k);
+    //         lmd = uint(lmd);
+    //         coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+    //         if(res_node == nullptr){
+    //             cout << "No statisfy result" << endl;
+    //         }else{
+    //             tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
+    //         }
+    //     }
+    // }
 
-    if(method == "pathk"){
+    // if(method == "mix"){
+    //     omp_set_num_threads(num_thread);
+    //     omp_set_max_active_levels(2); // Enable nested parallelism
+    //     auto start_time = omp_get_wtime(); 
+    //     FCCoreTree tree(1, 1, mg.GetN());
+    //     coreNodeP* node = tree.getNode();
+    //     FCTreeBuilderCoreParallel::ExecuteMix(mg, tree);
+    //     auto end_time = omp_get_wtime(); 
         
-        omp_set_num_threads(num_thread);
-        auto start_time = omp_get_wtime();
-        FCTree tree(1, 1, mg.GetN());
-        FCTreeBuilderPathParallelByk::Execute(mg, tree);
-        auto end_time = omp_get_wtime(); 
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
 
-        double elapsed_time = end_time - start_time;
-        std::cout << "Pathk Parallel Elapsed time: " << elapsed_time << " seconds\n";
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl;
+    // }
 
-
-        if(k != 0 && lmd != 0){
-            k = uint(k);
-            lmd = uint(lmd);
-            coreNode* res_node = tree.getCoreByKAndLmdByLeft(tree.getNode(), k, lmd);
-            if(res_node == nullptr){
-                cout << "No statisfy result" << endl;
-            }else{
-                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathk");
-            }
-        }
-
-
-    }
-
-    if(method == "pathlmd"){
+    // if(method == "pathk"){
         
-        omp_set_num_threads(num_thread);
-        auto start_time = omp_get_wtime();
-        FCTree tree(1, 1, mg.GetN());
-        FCTreeBuilderPathParallelBylmd::Execute(mg, tree);
-        auto end_time = omp_get_wtime(); 
+    //     omp_set_num_threads(num_thread);
+    //     auto start_time = omp_get_wtime();
+    //     FCTree tree(1, 1, mg.GetN());
+    //     FCTreeBuilderPathParallelByk::Execute(mg, tree);
+    //     auto end_time = omp_get_wtime(); 
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl;
+
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "Pathk Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+
+    //     if(k != 0 && lmd != 0){
+    //         k = uint(k);
+    //         lmd = uint(lmd);
+    //         coreNode* res_node = tree.getCoreByKAndLmdByLeft(tree.getNode(), k, lmd);
+    //         if(res_node == nullptr){
+    //             cout << "No statisfy result" << endl;
+    //         }else{
+    //             tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathk");
+    //         }
+    //     }
+    // 
+    // 
+    // }
+
+    // if(method == "pathlmd"){
         
-        double elapsed_time = end_time - start_time;
-        std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
-
-         // This part to get the output
-        if(k != 0 && lmd != 0){
-            k = uint(k);
-            lmd = uint(lmd);
-            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
-            if(res_node == nullptr){
-                cout << "No statisfy result" << endl;
-            }else{
-                tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
-            }
-        }
+    //     omp_set_num_threads(num_thread);
+    //     auto start_time = omp_get_wtime();
+    //     FCTree tree(1, 1, mg.GetN());
+    //     FCTreeBuilderPathParallelBylmd::Execute(mg, tree);
+    //     auto end_time = omp_get_wtime(); 
         
-        // For test use only
-        // for(int l = 1; l < mg.getLayerNumber(); l ++){
-        //     uint num_valid = 0;
-        //     tree.getNumValidRight(tree.getNode(), l, num_valid);
-        //     cout << "when lmd = " << l << " k max = " << num_valid << endl;
-        // }
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "Pathlmd Parallel Elapsed time: " << elapsed_time << " seconds\n";
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl;
 
-
-    }
-
-    if(method == "corek"){
-        omp_set_num_threads(num_thread);
-        auto start_time = omp_get_wtime(); 
-        FCCoreTree tree(1, 1, mg.GetN());
-        coreNodeP* node = tree.getNode();
-        FCTreeBuilderCoreParallelByK::Execute(mg, tree);
-        auto end_time = omp_get_wtime(); 
-
-        double elapsed_time = end_time - start_time;
-        std::cout << "Path right Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
-
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl; 
-    }
-
-    if(method == "mixr"){
-        omp_set_num_threads(num_thread);
-        omp_set_max_active_levels(2); // Enable nested parallelism
-        auto start_time = omp_get_wtime(); 
-        FCCoreTree tree(1, 1, mg.GetN());
-        coreNodeP* node = tree.getNode();
-        FCTreeBuilderCoreParallelByK::ExecuteMix(mg, tree);
-        auto end_time = omp_get_wtime(); 
+    //      // This part to get the output
+    //     if(k != 0 && lmd != 0){
+    //         k = uint(k);
+    //         lmd = uint(lmd);
+    //         coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+    //         if(res_node == nullptr){
+    //             cout << "No statisfy result" << endl;
+    //         }else{
+    //             tree.saveCoreToLocal(dataset, id2vtx, res_node, "pathlmd");
+    //         }
+    //     }
         
-        double elapsed_time = end_time - start_time;
-        std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+    //     // For test use only
+    //     // for(int l = 1; l < mg.getLayerNumber(); l ++){
+    //     //     uint num_valid = 0;
+    //     //     tree.getNumValidRight(tree.getNode(), l, num_valid);
+    //     //     cout << "when lmd = " << l << " k max = " << num_valid << endl;
+    //     // }
 
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
-    }
+
+    // }
+
+    // if(method == "corek"){
+    //     omp_set_num_threads(num_thread);
+    //     auto start_time = omp_get_wtime(); 
+    //     FCCoreTree tree(1, 1, mg.GetN());
+    //     coreNodeP* node = tree.getNode();
+    //     FCTreeBuilderCoreParallelByK::Execute(mg, tree);
+    //     auto end_time = omp_get_wtime(); 
+
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "Path right Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl; 
+    // }
+
+    // if(method == "mixr"){
+    //     omp_set_num_threads(num_thread);
+    //     omp_set_max_active_levels(2); // Enable nested parallelism
+    //     auto start_time = omp_get_wtime(); 
+    //     FCCoreTree tree(1, 1, mg.GetN());
+    //     coreNodeP* node = tree.getNode();
+    //     FCTreeBuilderCoreParallelByK::ExecuteMix(mg, tree);
+    //     auto end_time = omp_get_wtime(); 
+        
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl;
+    // }
 
 }

@@ -130,7 +130,6 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
     // Plan A store the valid array
     memcpy(node->valid, valid, sizeof(bool) * n_vertex);
     
-
     // TODO: Plan B store only the valid vertex index
 
     // If serial store the deg info and the invalid info
@@ -145,11 +144,11 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
         memcpy(node->invalid, invalid, n_vertex * sizeof(uint));
         node->cnts = new uint[n_vertex];
         memcpy(node->cnts, cnts, n_vertex * sizeof(uint));
+
+        // node->valid = new bool[n_vertex];
+        // memcpy(node->valid, valid, sizeof(bool) * n_vertex);
     }
 
-    // if(lmd == 10){
-    //     cout << "k = " << node->k << " lmd = " << node->lmd << " length = " << node->length << " new_e = " << node->e << endl;
-    // }
 }
 
 // Parallel Peel Process

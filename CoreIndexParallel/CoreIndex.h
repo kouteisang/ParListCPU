@@ -13,6 +13,7 @@ public:
     ~CoreIndex();
 
     static void Execute(MultilayerGraph &mg);
+
 };
 
 

@@ -13,7 +13,11 @@ struct coreNodeP{
     uint *core{nullptr}; // result core
     bool *valid{nullptr}; // valid vertex
     bool *t_valid{nullptr}; // valid vertex
-     
+
+
+    uint *valid2{nullptr}; // this is just for test
+    int invalidIndex{0}; // this is just for test
+
     uint* invalid{nullptr};
     uint* cnts{nullptr};
 

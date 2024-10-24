@@ -26,6 +26,12 @@
 #include "CoreParallel/FCTreeBuilderCoreParallel.h"
 #include "CoreParallel/FCTreeBuilderCoreParallelByK.h"
 
+// A new test
+#include "CoreParallelNew/CoreParallelNew.h"
+
+// A new algorithm
+#include "CoreIndexParallel/CoreIndex.h"
+
 
 
 uint* getLmd(){
@@ -186,7 +192,6 @@ int main(int argc, char* argv[]){
         // }
     }
 
-
     if(method == "CoreParallel"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime(); 
@@ -197,6 +202,33 @@ int main(int argc, char* argv[]){
         
         double elapsed_time = end_time - start_time;
         std::cout << "Path left Core Parallel Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
+    }
+
+    if(method == "CoreIndexParallel"){
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();
+        CoreIndex::Execute(mg);
+        auto end_time = omp_get_wtime(); 
+        double elapsed_time = end_time - start_time;
+        std::cout << "CoreIndex Parallel Elapsed time: " << elapsed_time << " seconds\n"; 
+
+    }
+
+    if(method == "CoreParallelNew"){
+
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();  
+        FCCoreTree tree(1, 1, mg.GetN());
+        coreNodeP* node = tree.getNode();
+        CoreParallelNew::Execute(mg,tree);
+        auto end_time = omp_get_wtime(); 
+
+         
+        double elapsed_time = end_time - start_time;
+        std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
 
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;

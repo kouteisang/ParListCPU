@@ -194,6 +194,7 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
     // cout << "new_e = " << new_e << endl;   
     uint vv;
     while(s < e){
+        cout << "E - S = " << e - s << endl;
 #pragma omp parallel private(vv, adj_lst) shared(s, e, new_e, valid, invalid, degs, cnts, mg)
 {
         #pragma omp for
@@ -245,7 +246,7 @@ void FCTreeBuilderCoreParallel::PathSerial(MultilayerGraph &mg, uint **degs, uin
    uint new_e = PeelInvalidInParallelByCount(mg, degs, k, lmd, node, valid, invalid, cnts, e, true);
 
    // means the (k, lambda)-constaint has the valid vertex
-   if(n_vertex - new_e > 0){
+    if(n_vertex - new_e > 0){
         lmd += 1;
         if(lmd <= n_layers){
             coreNodeP* rightChild = new coreNodeP();
@@ -254,7 +255,7 @@ void FCTreeBuilderCoreParallel::PathSerial(MultilayerGraph &mg, uint **degs, uin
         }else{
             node->right = nullptr;
         }
-   }
+    }
 }
 
 void FCTreeBuilderCoreParallel::PathByK(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e){

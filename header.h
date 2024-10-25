@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <omp.h>
 #include <cstring>
+#include <set>
 
 using std::string;
 using std::ofstream;

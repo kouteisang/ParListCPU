@@ -52,14 +52,16 @@ uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd){
                 for(uint u = 1; u <= adj_lst[v][0]; u ++){
                     uint nb_u = adj_lst[v][u]; // node v's neighbourhood in layer l
                     if(i_v[nb_u] <= k) continue;
+                    // cout << "I am here" << "nb_u = " << nb_u << " i_v[nb_u] = " <<  i_v[nb_u]  << " k = " << k << endl;
                     degs[nb_u][l] = degs[nb_u][l] - 1;
                     if(degs[nb_u][l] == i_v[nb_u] - 1){
-                        N.insert(u);
+                        N.insert(nb_u);
                     }
                 }
             }
 
             for(const uint& u : N){
+                // cout << "k ist = " << k  <<  " u here ist = " << u << endl;
                 B[i_v[u]].erase(std::remove(B[i_v[u]].begin(), B[i_v[u]].end(), u), B[i_v[u]].end());
                 i_v[u] = findLmdthLargest(degs[u], lmd, n_layer); 
                 B[std::max(i_v[u],k)].push_back(u);
@@ -128,7 +130,7 @@ void CoreIndex::Execute(MultilayerGraph &mg){
     //     cout << endl;
     // }
 
-    for(uint lmd = 1; lmd <= 1; lmd ++){
+    for(uint lmd = 2; lmd <= n_layer; lmd ++){
 
         // Copy the degs degree
         uint **degs_copy = new uint*[n_vertex];
@@ -136,6 +138,14 @@ void CoreIndex::Execute(MultilayerGraph &mg){
             degs_copy[v] = new uint[n_layer];
             memcpy(degs_copy[v], degs[v], n_layer * sizeof(uint));
         }
+
+        // for(int v = 0; v < n_vertex; v ++){
+        //     cout << "vertex " <<  v << " = ";
+        //     for(int l = 0; l < n_layer; l ++){
+        //         cout << degs_copy[v][l] << " ";
+        //     }
+        //     cout << endl;
+        // }
 
         uint *core = get_index(mg, degs_copy, lmd);
 

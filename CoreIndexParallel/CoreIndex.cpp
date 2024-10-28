@@ -10,11 +10,6 @@ bool reverseSort(uint a, uint b) {
     return a > b; 
 }
 
-// uint findLmdthLargest(uint *degs, int lmd, int n_layer){
-//     std::nth_element(degs, degs + lmd - 1, degs+n_layer, std::greater<int>());
-//     return degs[lmd-1];
-// }
-
 void print(std::vector<std::vector<uint>> B, uint n_vertex){
     cout << "==========Round==========" << endl;
    for(uint k = 1; k <= n_vertex; k ++){
@@ -74,28 +69,28 @@ uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd){
     // }
 
     // cout << "=====i_v information=====" << endl;
-    for(uint v = 0; v < n_vertex; v ++){
-        cout << "v = " << v << " i_v = " << i_v[v] << endl;
-    }
+    // for(uint v = 0; v < n_vertex; v ++){
+    //     cout << "v = " << v << " i_v = " << i_v[v] << endl;
+    // }
 
 
     // cout << "=====B information=====" << endl;
-    for(uint k = 1; k <= n_vertex; k ++){
-        cout << "k = " << k << ": ";
-        for(uint j = 0; j < B[k].size(); j ++){
-            cout << B[k][j] << " ";
-        }
-        cout << endl;
-    }
+    // for(uint k = 1; k <= n_vertex; k ++){
+    //     cout << "k = " << k << ": ";
+    //     for(uint j = 0; j < B[k].size(); j ++){
+    //         cout << B[k][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 
     //     cout << "=====5 degree information=====" << endl;
     // cout << "deg 5 0 = " << degs[5][0] << endl;
     // cout << "deg 5 1 = " << degs[5][1] << endl;
     
     for(uint k = 1; k <= n_vertex; k ++){
-        while(!B[k].empty()){
+        while(!B[k].empty()){ 
             std::set<uint> N;
-            int v = B[k].back();
+            uint v = B[k].back();
             B[k].pop_back();
             core[v] = k;
             for(uint l = 0; l < n_layer; l ++){
@@ -126,7 +121,7 @@ uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd){
             }
 
             // print(B, n_vertex);
-            break;
+            // break;
         }
 
     }
@@ -173,7 +168,7 @@ void CoreIndex::Execute(MultilayerGraph &mg){
 
 
 
-    for(uint lmd = 2; lmd <= n_layer; lmd ++){
+    for(uint lmd = 1; lmd <= n_layer; lmd ++){
 
         // Copy the degs degree
         uint **degs_copy = new uint*[n_vertex];
@@ -191,11 +186,12 @@ void CoreIndex::Execute(MultilayerGraph &mg){
 
         uint *core = get_index(mg, degs_copy, lmd);
 
+        
         cout << "lmd = " << lmd << endl;
         cout << "==========" << endl;
-        for(uint v = 0; v < n_vertex; v ++){
-            cout << "v = " << v << " k = " << core[v] << "\n";
-        }
+        // for(uint v = 0; v < n_vertex; v ++){
+        //     cout << "v = " << v << " k = " << core[v] << "\n";
+        // }
     }
 
 }

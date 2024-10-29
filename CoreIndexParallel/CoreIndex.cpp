@@ -154,7 +154,7 @@ void CoreIndex::Execute(MultilayerGraph &mg, ll_uint *id2vtx){
         
         cout << "lmd = " << lmd << endl;
         cout << "==========" << endl;
-        std::ofstream outFile("/home/cheng/fctree/Output/sacchcere-"+std::to_string(lmd)+".txt");
+        std::ofstream outFile("/home/cheng/fctree/OutputSo/so-"+std::to_string(lmd)+".txt");
         for(uint v = 0; v < n_vertex; v ++){
             outFile << id2vtx[v] << ": " << core[v] << endl;
             // cout << v << ": " << core[v] << endl;

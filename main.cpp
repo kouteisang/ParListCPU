@@ -207,7 +207,7 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl;
     }
 
-    if(method == "CoreIndexParallel"){
+    if(method == "Sota"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         CoreIndex::Execute(mg, id2vtx);

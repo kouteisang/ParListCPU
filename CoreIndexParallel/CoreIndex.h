@@ -12,7 +12,7 @@ public:
     CoreIndex(/* args */);
     ~CoreIndex();
 
-    static void Execute(MultilayerGraph &mg);
+    static void Execute(MultilayerGraph &mg, ll_uint *id2vtx);
 
 };
 

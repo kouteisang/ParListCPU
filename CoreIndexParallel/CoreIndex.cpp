@@ -32,7 +32,7 @@ uint findLmdthLargest(uint *deg, uint lmd, uint n_layer){
     return deg_sort[lmd-1];
 }
 
-uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd){
+uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd, ll_uint *id2vtx){
      
 
     uint n_layer = mg.getLayerNumber();
@@ -40,88 +40,53 @@ uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd){
     uint *i_v = new uint[n_vertex];
     uint *core = new uint[n_vertex];
 
-    std::vector<std::vector<uint>> B(n_vertex+1);
+    std::vector<std::set<uint>> B(n_vertex+1);
 
-    
-    // cout << "==========Befor Order==========\n" << endl;
+    bool visit[n_vertex];
+    memset(visit, false, sizeof(bool) * n_vertex);
 
-    // for(int v = 0; v < n_vertex; v ++){
-    //     cout << "vertex " <<  v << " = ";
-    //     for(int l = 0; l < n_layer; l ++){
-    //         cout << degs[v][l] << " ";
-    //     }
-    //     cout << endl;
-    // }
 
     for(uint v = 0; v < n_vertex; v ++){
         i_v[v] = findLmdthLargest(degs[v], lmd, n_layer); // This is where the problem happens
-        B[i_v[v]].push_back(v);
+        B[i_v[v]].insert(v);
     }
 
-    // cout << "==========After Order==========\n" << endl;
-
-    // for(int v = 0; v < n_vertex; v ++){
-    //     cout << "vertex " <<  v << " = ";
-    //     for(int l = 0; l < n_layer; l ++){
-    //         cout << degs[v][l] << " ";
-    //     }
-    //     cout << endl;
-    // }
-
-    // cout << "=====i_v information=====" << endl;
+    // std::ofstream outFile("/home/cheng/fctree/Output/homo-degree-"+std::to_string(lmd)+".txt");
     // for(uint v = 0; v < n_vertex; v ++){
-    //     cout << "v = " << v << " i_v = " << i_v[v] << endl;
+    //     outFile << id2vtx[v] << ": " << i_v[v] << endl;
+    //     // cout << v << ": " << core[v] << endl;
     // }
+    // outFile.close();
 
-
-    // cout << "=====B information=====" << endl;
-    // for(uint k = 1; k <= n_vertex; k ++){
-    //     cout << "k = " << k << ": ";
-    //     for(uint j = 0; j < B[k].size(); j ++){
-    //         cout << B[k][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
-
-    //     cout << "=====5 degree information=====" << endl;
-    // cout << "deg 5 0 = " << degs[5][0] << endl;
-    // cout << "deg 5 1 = " << degs[5][1] << endl;
     
-    for(uint k = 1; k <= n_vertex; k ++){
+    for(uint k = 0; k <= n_vertex; k ++){
         while(!B[k].empty()){ 
+            auto v = B[k].begin();
+            uint vv = *v;
+            B[k].erase(vv);
+            core[vv] = k;
+            visit[vv] = true;
+            // cout << "vv = " << vv << endl;
             std::set<uint> N;
-            uint v = B[k].back();
-            B[k].pop_back();
-            core[v] = k;
             for(uint l = 0; l < n_layer; l ++){
                 uint **adj_lst = mg.GetGraph(l).GetAdjLst();
-                for(uint u = 1; u <= adj_lst[v][0]; u ++){
-                    uint nb_u = adj_lst[v][u]; // node v's neighbourhood in layer l
+                for(uint u = 1; u <= adj_lst[vv][0]; u ++){
+                    uint nb_u = adj_lst[vv][u]; // node v's neighbourhood in layer l
                     if(i_v[nb_u] <= k) continue;
-                    // cout << "I am here before" << " l = " << ll << " nb_u = "  << nb_u << " i_v[nb_u] = " <<  i_v[nb_u]  << " deg = " << degs[nb_u][ll] << endl;
+                    if(visit[nb_u]) continue;
                     degs[nb_u][l] = degs[nb_u][l] - 1;
-                    // cout << "I am here after" << " l = " << ll << " nb_u = " << nb_u << " degree [nb_u] = " <<  degs[nb_u][ll] << endl;
-                    if(degs[nb_u][l] == i_v[nb_u] - 1){
+                    if(degs[nb_u][l] + 1 == i_v[nb_u]){
                         N.insert(nb_u);
                     }
                 }
             }
-            // cout << "k = " << k << " v = " << v << endl;
-            // for(const uint &u : N){
-            //     cout << "u = " << u << endl;
-            // }
+            
             for(const uint& u : N){
-                // cout << "k ist = " << k  <<  " u here ist = " << u << endl;
-                B[i_v[u]].erase(std::remove(B[i_v[u]].begin(), B[i_v[u]].end(), u), B[i_v[u]].end());
+                B[i_v[u]].erase(u);
                 i_v[u] = findLmdthLargest(degs[u], lmd, n_layer); 
-                bool flag = std::find(B[std::max(i_v[u],k)].begin(), B[std::max(i_v[u],k)].end(), u) != B[std::max(i_v[u],k)].end();
-                if(!flag){
-                    B[std::max(i_v[u],k)].push_back(u);
-                }
+                B[std::max(i_v[u], k)].insert(u);
             }
 
-            // print(B, n_vertex);
-            // break;
         }
 
     }
@@ -129,7 +94,7 @@ uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd){
     return core;
 }
 
-void CoreIndex::Execute(MultilayerGraph &mg){
+void CoreIndex::Execute(MultilayerGraph &mg, ll_uint *id2vtx){
     cout << "I am the CoreIndex" << endl;
     uint n_layer = mg.getLayerNumber();
     uint n_vertex = mg.GetN();
@@ -184,14 +149,17 @@ void CoreIndex::Execute(MultilayerGraph &mg){
         //     cout << endl;
         // }
 
-        uint *core = get_index(mg, degs_copy, lmd);
+        uint *core = get_index(mg, degs_copy, lmd, id2vtx);
 
         
         cout << "lmd = " << lmd << endl;
         cout << "==========" << endl;
-        // for(uint v = 0; v < n_vertex; v ++){
-        //     cout << "v = " << v << " k = " << core[v] << "\n";
-        // }
+        std::ofstream outFile("/home/cheng/fctree/Output/sacchcere-"+std::to_string(lmd)+".txt");
+        for(uint v = 0; v < n_vertex; v ++){
+            outFile << id2vtx[v] << ": " << core[v] << endl;
+            // cout << v << ": " << core[v] << endl;
+        }
+        outFile.close();
     }
 
 }

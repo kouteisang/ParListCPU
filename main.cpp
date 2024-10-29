@@ -210,7 +210,7 @@ int main(int argc, char* argv[]){
     if(method == "CoreIndexParallel"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
-        CoreIndex::Execute(mg);
+        CoreIndex::Execute(mg, id2vtx);
         auto end_time = omp_get_wtime(); 
         double elapsed_time = end_time - start_time;
         std::cout << "CoreIndex Parallel Elapsed time: " << elapsed_time << " seconds\n"; 

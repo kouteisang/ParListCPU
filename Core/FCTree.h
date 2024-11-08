@@ -55,6 +55,10 @@ public:
 
     void saveCoreToLocal(string dataset, ll_uint *id2vtx, coreNode *node, string method);
 
+    void WeightDenestSubgraph(coreNode *node, MultilayerGraph &mg, float beta, float &maximum_density);
+
+    void WeightDenestSubgraph(coreNode *node);
+
     //Test when program
     void traversal(coreNode *node, uint& count);
 

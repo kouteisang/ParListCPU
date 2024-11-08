@@ -5,6 +5,8 @@
 #include "header.h"
 #include "Util/MemoryUtils.h"
 #include "Util/KLmdUtils.h"
+#include "Util/CheckMLCDTime.h"
+#include "Util/CoreIndexTime.h"
 
 // Naive
 #include "Core/FCTreeDFS.h"
@@ -207,7 +209,7 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl;
     }
 
-    if(method == "Sota"){
+    if(method == "CoreIndex"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         CoreIndex::Execute(mg, id2vtx);
@@ -217,23 +219,117 @@ int main(int argc, char* argv[]){
 
     }
 
-    if(method == "CoreParallelNew"){
+    if(method == "wds"){
+        FCTree tree(1, 1, mg.GetN());
+        FCPathLevelLeft::Execute(mg, tree);
+    
+        float beta = 2.0;
+        float maximum_density = 0.0f;
 
-        omp_set_num_threads(num_thread);
-        auto start_time = omp_get_wtime();  
-        FCCoreTree tree(1, 1, mg.GetN());
-        coreNodeP* node = tree.getNode();
-        CoreParallelNew::Execute(mg,tree);
-        auto end_time = omp_get_wtime(); 
+        // tree.WeightDenestSubgraph();
 
-         
-        double elapsed_time = end_time - start_time;
-        std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
-
-        long double mem = GetPeakRSSInMB();
-        cout << "mem = " << mem << " MB" << endl;
+        // tree.WeightDenestSubgraph(tree.getNode(), mg, beta, maximum_density);
+        uint count = 0;
+        tree.traversal(tree.getNode(), count);
     }
 
+    // if(method == "CoreParallelNew"){
+
+    //     omp_set_num_threads(num_thread);
+    //     auto start_time = omp_get_wtime();  
+    //     FCCoreTree tree(1, 1, mg.GetN());
+    //     coreNodeP* node = tree.getNode();
+    //     CoreParallelNew::Execute(mg,tree);
+    //     auto end_time = omp_get_wtime(); 
+
+         
+    //     double elapsed_time = end_time - start_time;
+    //     std::cout << "Elapsed time: " << elapsed_time << " seconds\n";
+
+    //     long double mem = GetPeakRSSInMB();
+    //     cout << "mem = " << mem << " MB" << endl;
+    // }
+
+
+    if(method == "MLCDTime"){
+        auto core_path = "/home/cheng/MlcDec/leaf/"+ dataset +"_cores.txt";
+        auto klmd_path = "/home/cheng/fctree/klmd/"+ dataset +"_klmd.txt";
+
+        vector<int> ks;
+        vector<int> lmds;
+        
+        vector<vector<int>> cores;
+
+        std::ifstream inputFile(klmd_path); 
+        int kk, lmdd;
+        while (inputFile >> kk >> lmdd) {
+            ks.push_back(kk);
+            lmds.push_back(lmdd);
+        }
+
+        string line;
+        std::ifstream coreFile(core_path); 
+        while (std::getline(coreFile, line)) {
+            std::istringstream stream(line);  // 创建字符串流用于拆分
+            std::vector<int> row;             // 存储一行的整数
+            int number;
+
+            // 将一行中的整数依次提取到row中
+            while (stream >> number) {
+                row.push_back(number);
+            }
+
+            // 将完整的一行（vector<int>）添加到data中
+            cores.push_back(row);
+        }
+
+        auto start_time = omp_get_wtime();   
+        checktime(ks, lmds, cores);
+        auto end_time = omp_get_wtime();
+        double elapsed_time = end_time - start_time;
+        std::cout << "Elapsed time: " << elapsed_time << " seconds\n"; 
+
+    }
+
+    // if(method == "CoreIndexTime"){
+
+    //     auto klmd_path = "/home/cheng/fctree/klmd/"+ dataset +"_klmd.txt";
+
+    //     vector<vector<int>> klmd(mg.getLayerNumber()+1);
+        
+    //     vector<vector<int>> cores;
+
+    //     std::ifstream inputFile(klmd_path); 
+    //     int kk, lmdd;
+    //     while (inputFile >> kk >> lmdd) {
+    //         klmd[lmdd].push_back(kk);
+    //     }
+
+    //     vector<vector<pair<int, int>>> results(mg.getLayerNumber()+1);
+    //     int key, value;
+
+    //     for(uint l = 1; l <= mg.getLayerNumber(); l ++){
+    //         std::ifstream coreFile("/home/cheng/fctree/Output/"+dataset+"-"+std::to_string(l)+".txt");
+
+    //         while (coreFile >> key) {           // 读取第一个整数
+    //             coreFile.ignore(1, ':');        // 忽略冒号
+    //             coreFile >> std::ws >> value;    // 忽略空格并读取第二个整数
+    //             results[l].push_back(std::make_pair(key, value)); // 存入pair并加入vector
+    //         }
+
+    //         coreFile.close();
+    //     }
+
+
+    //     auto start_time = omp_get_wtime(); 
+
+    //     getResCore(klmd, results, mg.getLayerNumber());
+
+    //     auto end_time = omp_get_wtime();  
+        
+    //     double retrieve_time = end_time - start_time;
+    //     std::cout << "Elapsed time: " << retrieve_time << " seconds\n";
+    // }
     // if(method == "PathParallelRight"){
     //     omp_set_num_threads(num_thread);
     //     auto start_time = omp_get_wtime();

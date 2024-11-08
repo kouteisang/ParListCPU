@@ -11,6 +11,10 @@
 #include <omp.h>
 #include <cstring>
 #include <set>
+#include <utility>
+#include <unordered_set>
+#include <cmath>
+
 
 using std::string;
 using std::ofstream;
@@ -19,6 +23,8 @@ using std::endl;
 using std::cout;
 using std::ifstream;
 using std::sort;
+using std::vector;
+using std::pair;
 typedef long long unsigned ll_uint;
 
 

@@ -28,6 +28,7 @@ method(-m):
 - OptimizedRight
 - PathParallel
 - CoreParallel
+- CoreIndex
 
 num of thread (-num_thread)
 

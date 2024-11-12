@@ -155,7 +155,7 @@ int main(int argc, char* argv[]){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
-        FCPathLevelLeft::Execute(mg, tree);
+        FCPathLevelLeft::Execute(mg, tree, false);
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;
@@ -219,18 +219,37 @@ int main(int argc, char* argv[]){
 
     }
 
-    if(method == "wds"){
+    if(method == "WdsFctree"){
+        uint res_k = 0;
+        uint res_lmd = 0;
+        uint res_len = 0;
+        float maximum_density = 0.0f; 
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
-        FCPathLevelLeft::Execute(mg, tree);
-    
+        FCPathLevelLeft::Execute(mg, tree, true);
+        auto end_time = omp_get_wtime(); 
+
+        // tree.WeightDenestSubgraph(tree.getNode(), maximum_density, res_k, res_lmd, res_len); 
+        // cout << "maximum_density = " << maximum_density << endl;
+        // cout << "res_k = " << res_k << endl;
+        // cout << "res_lmd = " << res_lmd << endl;
+        // cout << "res_len = " << res_len << endl;
+         
+
+        double elapsed_time = end_time - start_time;
+        std::cout << "Wds Fctree Elapsed time: " << elapsed_time << " seconds\n";
+
+    }
+
+    if(method == "WdsCoreIndex"){
         float beta = 2.0;
-        float maximum_density = 0.0f;
-
-        // tree.WeightDenestSubgraph();
-
-        // tree.WeightDenestSubgraph(tree.getNode(), mg, beta, maximum_density);
-        uint count = 0;
-        tree.traversal(tree.getNode(), count);
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();
+        CoreIndex::WdsCoreIndex(mg, id2vtx, beta);
+        auto end_time = omp_get_wtime(); 
+        double elapsed_time = end_time - start_time;
+        cout << "Wds CoreIndex Time = " << elapsed_time << endl;
     }
 
     // if(method == "CoreParallelNew"){

@@ -6,93 +6,15 @@ FCTreeBuilderCoreParallel::~FCTreeBuilderCoreParallel(){
 }
 
 
+// struct LayerDegree{
+//     uint id;
+//     float degree;
+// };
 
-// TODO: The following method has bug, please do not use this function
-// uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCheck(MultilayerGraph &mg, uint **degs, uint k, uint lmd, coreNodeP* node, bool* valid, uint* invalid, uint* cnts, uint e, bool serial){
-//     uint n_vertex = mg.GetN(); // number of vertex
-//     uint n_layers = mg.getLayerNumber();
-//     uint cnt = 0;
-//     uint s = e, new_e = 0;
-//     uint **adj_lst;
-
-//     // Debug for test
-
-// #pragma omp parallel private(cnt) shared(cnts, k, lmd, n_vertex)
-// {
-//     uint tid = omp_get_thread_num();
-//     uint maxthreads = omp_get_num_threads();
-
-//     for(int v = tid; v < n_vertex; v += maxthreads){
-//         cnt = 0;
-//         if(valid[v] != 1){
-//             cnts[v] = 0;
-//             continue; // only process the valid vertex
-//         } 
-//         for(int l = 0; l < n_layers; l ++){
-//             if(degs[v][l] >= k){
-//                 cnt += 1;
-//             }
-//         }
-//         cnts[v] = cnt;
-
-
-//         if(cnts[v] < lmd){
-//             valid[v] = 0;
-//             int index;
-//             #pragma omp atomic capture
-//             index = e++;
-//             invalid[index] = v;
-//         }
-//     }
+// bool cmp(const LayerDegree &a, const LayerDegree &b){
+//     return a.degree > b.degree;
 // }
 
-//     new_e = e;
-//     // cout << "new_e = " << new_e << endl;
-//     uint vv;
-//     while(s < e){
-
-// #pragma omp parallel private(vv, adj_lst) shared(s, e, new_e, valid, invalid, degs, mg, cnts)
-// {
-//         #pragma omp for
-//         for(uint j = s; j < e; j ++){
-//             vv = invalid[j];
-//             for(uint l = 0; l < n_layers; l ++){
-//                 adj_lst = mg.GetGraph(l).GetAdjLst();
-//                 for(uint i = 1; i <= adj_lst[vv][0]; i ++){
-//                     uint u = adj_lst[vv][i]; // the neighbourhood
-//                     if(valid[u] != 1) continue; // only process if u is valid
-//                     // minus one and return the old value
-//                     auto originDeg = __sync_fetch_and_sub(&degs[u][l], 1);
-//                     if(originDeg == k){
-//                         if(valid[u] == 1 && !check(degs, u, k, lmd, n_layers)){
-//                             #pragma omp critical
-//                             {
-//                                 invalid[new_e] = u;  
-//                                 new_e ++;
-//                             }
-//                             valid[u] = 0;
-//                             cnts[u] = 0;
-//                         }    
-//                     }
-//                 }
-//             }
-//         }
-//         #pragma omp barrier
-// }
-
-//         s = e;
-//         e = new_e;
-//     }
-
-   
-//     if(n_vertex - new_e > 0){
-//         constructCore(node, k, lmd, new_e, n_vertex, n_layers, valid, invalid, degs, cnts, serial);
-//     }else{
-//         node = nullptr;
-//     }
-   
-//     return new_e;
-// }
 
 
 // Useful common method
@@ -118,7 +40,7 @@ bool FCTreeBuilderCoreParallel::check(uint **degs, uint u, uint k, uint lmd, uin
     // }
 }
 
-void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd, uint new_e, uint n_vertex, uint n_layer, bool* valid, uint* invalid, uint** degs, uint* cnts, bool serial){
+void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd, uint new_e, uint n_vertex, uint n_layer, bool* valid, uint* invalid, uint** degs, uint* cnts, bool serial, bool wds){
     
     node->k = k;
     node->lmd = lmd;
@@ -145,8 +67,45 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
         node->cnts = new uint[n_vertex];
         memcpy(node->cnts, cnts, n_vertex * sizeof(uint));
 
-        // node->valid = new bool[n_vertex];
-        // memcpy(node->valid, valid, sizeof(bool) * n_vertex);
+    }
+
+    // wds = false;
+     if(wds){
+
+
+        // LayerDegree *layer_degree = new LayerDegree[n_layer];
+        // for(uint l = 0; l < n_layer; l ++){
+        //     uint num_edge = 0;
+        //     for(uint v = 0; v < n_vertex; v ++){
+        //         if(node->valid[v]){
+        //             num_edge += node->degs[v][l]; 
+        //         }
+        //     }
+        //     layer_degree[l].id = l;
+        //     layer_degree[l].degree = num_edge*1.0f/2;
+        // }
+
+        // float *maximum_average_degree = new float[n_layer];
+
+        // if (layer_degree == nullptr || n_layer <= 0) {
+        //     std::cerr << "Invalid layer_degree array or n_layer value." << std::endl;
+        //     return;
+        // }
+
+        // std::sort(layer_degree, layer_degree+n_layer, cmp);
+
+    //     for(uint l = 0; l < n_layer; l ++){
+    //         auto lid = layer_degree[l].id;
+    //         maximum_average_degree[lid] = layer_degree[l].degree*1.0f / node->length;
+    //         float layer_density = maximum_average_degree[lid] * pow((l+1), 2); 
+    //         // if(layer_density >= maximum_density){
+    //             // maximum_density = layer_density;
+    //             cout << "Maximum density = " << layer_density << " k = " << node->k << " lmd = " << node->lmd << " length = " << node->length <<endl;
+    //         // }
+    //     }
+        
+    //     delete[] layer_degree;
+        
     }
 
 }
@@ -194,7 +153,7 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
     // cout << "new_e = " << new_e << endl;   
     uint vv;
     while(s < e){
-        cout << "E - S = " << e - s << endl;
+        // cout << "E - S = " << e - s << endl;
 #pragma omp parallel private(vv, adj_lst) shared(s, e, new_e, valid, invalid, degs, cnts, mg)
 {
         #pragma omp for
@@ -229,7 +188,7 @@ uint FCTreeBuilderCoreParallel::PeelInvalidInParallelByCount(MultilayerGraph &mg
         e = new_e;
     }
     if(n_vertex - new_e > 0){
-        constructCore(node, k, lmd, new_e, n_vertex, n_layers, valid, invalid, degs, cnts, serial);
+        constructCore(node, k, lmd, new_e, n_vertex, n_layers, valid, invalid, degs, cnts, serial, true);
     }else{
         node = nullptr;
     }

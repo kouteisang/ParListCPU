@@ -152,7 +152,7 @@ void FCPathLevelRight::PathSerial(MultilayerGraph& mg, uint *klmd, uint** degs, 
 
     if(n_vertex - new_e > 0){
         count ++;
-        PrintCoreInfor(klmd, core, new_e, n_vertex);
+        // PrintCoreInfor(klmd, core, new_e, n_vertex);
         constructCore(degs, klmd, pos, core, n_vertex, n_layer, node, new_e, true);
     }else{
         node->k = 0;
@@ -231,7 +231,7 @@ void FCPathLevelRight::PathParallel(MultilayerGraph &mg, coreNode *node, uint** 
    if(n_vertex - new_e > 0){
         coreNode* rightChild = new coreNode();
         node->right = rightChild;
-        PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
         constructCore(degs, klmd, pos, core, n_vertex, n_layer, rightChild, new_e, false);
         PathParallel(mg, rightChild, degs, pos, core, new_e);
     }else{

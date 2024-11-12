@@ -28,7 +28,7 @@ public:
     // useful common method
     static bool check(uint **degs, uint u, uint k, uint lmd, uint n_layers);
 
-    static void constructCore(coreNodeP *node, uint k, uint lmd, uint new_e, uint n_vertex, uint n_layer, bool* valid, uint* invalid, uint** degs, uint* cnts, bool serial);
+    static void constructCore(coreNodeP *node, uint k, uint lmd, uint new_e, uint n_vertex, uint n_layer, bool* valid, uint* invalid, uint** degs, uint* cnts, bool serial, bool wds);
 
     // Mix strategy
     static void ExecuteMix(MultilayerGraph &mg, FCCoreTree &tree);

@@ -17,6 +17,10 @@ struct coreNode{
     uint *o_pos{nullptr}; // original pos
     uint *o_core{nullptr};
 
+    float layer_density{0.0};
+    uint density_k{0};
+    uint density_lmd{0};
+
     uint e{0}; // e is the start point
 
     coreNode* left;
@@ -55,9 +59,7 @@ public:
 
     void saveCoreToLocal(string dataset, ll_uint *id2vtx, coreNode *node, string method);
 
-    void WeightDenestSubgraph(coreNode *node, MultilayerGraph &mg, float beta, float &maximum_density);
-
-    void WeightDenestSubgraph(coreNode *node);
+    void WeightDenestSubgraph(coreNode *node, float &maximum_density, uint &k, uint &lmd, uint &len);
 
     //Test when program
     void traversal(coreNode *node, uint& count);

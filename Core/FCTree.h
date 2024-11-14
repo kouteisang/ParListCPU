@@ -23,8 +23,8 @@ struct coreNode{
 
     uint e{0}; // e is the start point
 
-    coreNode* left;
-    coreNode* right;
+    coreNode* left{nullptr};
+    coreNode* right{nullptr};
 
     coreNode(){};
 

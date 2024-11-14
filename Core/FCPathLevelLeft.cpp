@@ -76,7 +76,7 @@ void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *co
             // cout << "layer_density = " << layer_density << " k = " << node->k << " lmd = " << node->lmd << endl;
         }
 
-        cout << "layer_density = " << node->layer_density << " k = " << node->k << " lmd = " << node->lmd << endl; 
+        // cout << "layer_density = " << node->layer_density << " k = " << node->k << " lmd = " << node->lmd << endl; 
 
         delete[] layer_degree;
         

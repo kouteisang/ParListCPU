@@ -230,11 +230,18 @@ int main(int argc, char* argv[]){
         FCPathLevelLeft::Execute(mg, tree, true);
         auto end_time = omp_get_wtime(); 
 
-        // tree.WeightDenestSubgraph(tree.getNode(), maximum_density, res_k, res_lmd, res_len); 
-        // cout << "maximum_density = " << maximum_density << endl;
-        // cout << "res_k = " << res_k << endl;
-        // cout << "res_lmd = " << res_lmd << endl;
-        // cout << "res_len = " << res_len << endl;
+
+        #pragma omp parallel
+        {
+            #pragma omp single
+            {
+                tree.WeightDenestSubgraph(tree.getNode(), maximum_density, res_k, res_lmd, res_len);
+            }
+        }
+        cout << "maximum_density = " << maximum_density << endl;
+        cout << "res_k = " << res_k << endl;
+        cout << "res_lmd = " << res_lmd << endl;
+        cout << "res_len = " << res_len << endl;
          
 
         double elapsed_time = end_time - start_time;

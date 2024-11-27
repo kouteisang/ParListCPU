@@ -21,10 +21,12 @@ struct coreNodeP{
     uint* invalid{nullptr};
     uint* cnts{nullptr};
 
+    bool* res{nullptr};
+
     uint e{0}; // e is the start point
 
-    coreNodeP* left;
-    coreNodeP* right;
+    coreNodeP* left{nullptr};
+    coreNodeP* right{nullptr};
 
     coreNodeP(){};
 
@@ -54,6 +56,23 @@ public:
     // get the root Node
     inline coreNodeP* getNode() const {
         return node;
+    }
+
+    void traversal(coreNodeP *node, uint num_vertex){
+        if(node != nullptr && node->k != 0 && node->lmd != 0){
+            
+            uint cnt = 0;
+            for(uint v = 0; v < num_vertex; v ++){
+                if(node->res[v] == true){
+                    cnt ++;
+                }
+            }
+
+            cout << node->k << " " << node->lmd << " cnt = " <<  cnt << endl;
+
+            traversal(node->left, num_vertex);
+            traversal(node->right, num_vertex);
+        }
     }
 };
 

@@ -47,11 +47,26 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
     node->length = n_vertex - new_e;
     node->e = new_e;
     node->valid = new bool[n_vertex];
+    // node->res = new bool[n_vertex];
      
 
     // Plan A store the valid array
     memcpy(node->valid, valid, sizeof(bool) * n_vertex);
+    // memcpy(node->res, valid, sizeof(bool) * n_vertex);
     
+    // cout << "k = " << node->k << " lmd = " << node->lmd << " len = " << node->length << endl;
+    // if(node->k == 2 && node->lmd == 19){
+    // uint cnt = 0;
+    // for(uint i = 0; i < n_vertex; i ++){
+    //     if(node->valid[i] == true){
+    //         cnt ++;
+    //     }
+    // }
+    // if(cnt != node->length){
+    //     cout << "Error!!!" << endl;
+    // }
+    // }
+
     // TODO: Plan B store only the valid vertex index
 
     // If serial store the deg info and the invalid info
@@ -69,44 +84,6 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
 
     }
 
-    // wds = false;
-     if(wds){
-
-
-        // LayerDegree *layer_degree = new LayerDegree[n_layer];
-        // for(uint l = 0; l < n_layer; l ++){
-        //     uint num_edge = 0;
-        //     for(uint v = 0; v < n_vertex; v ++){
-        //         if(node->valid[v]){
-        //             num_edge += node->degs[v][l]; 
-        //         }
-        //     }
-        //     layer_degree[l].id = l;
-        //     layer_degree[l].degree = num_edge*1.0f/2;
-        // }
-
-        // float *maximum_average_degree = new float[n_layer];
-
-        // if (layer_degree == nullptr || n_layer <= 0) {
-        //     std::cerr << "Invalid layer_degree array or n_layer value." << std::endl;
-        //     return;
-        // }
-
-        // std::sort(layer_degree, layer_degree+n_layer, cmp);
-
-    //     for(uint l = 0; l < n_layer; l ++){
-    //         auto lid = layer_degree[l].id;
-    //         maximum_average_degree[lid] = layer_degree[l].degree*1.0f / node->length;
-    //         float layer_density = maximum_average_degree[lid] * pow((l+1), 2); 
-    //         // if(layer_density >= maximum_density){
-    //             // maximum_density = layer_density;
-    //             cout << "Maximum density = " << layer_density << " k = " << node->k << " lmd = " << node->lmd << " length = " << node->length <<endl;
-    //         // }
-    //     }
-        
-    //     delete[] layer_degree;
-        
-    }
 
 }
 
@@ -252,6 +229,7 @@ void FCTreeBuilderCoreParallel::BuildSubFCTree(FCCoreTree &tree, MultilayerGraph
 
     coreNodeP* root = tree.getNode();
 
+
     while(root != nullptr && root->k != 0){
 
             coreNodeP* leftChild = new coreNodeP();
@@ -284,7 +262,7 @@ void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree){
         #pragma omp for schedule(static)
         for(int v = 0; v < n_vertex; v ++){
              degs[v] = new uint[n_layers];
-             valid[v] = true; // 1 is valid
+            //  valid[v] = true; // 1 is valid
         } 
 
         #pragma omp for schedule(static) collapse(2)
@@ -296,7 +274,7 @@ void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree){
         }
     }
 
-
+   memset(valid, true, sizeof(bool) * n_vertex);
 
     uint klmd[2];
     klmd[0] = 1; // k
@@ -307,6 +285,8 @@ void FCTreeBuilderCoreParallel::Execute(MultilayerGraph &mg, FCCoreTree &tree){
     // Free the memory
     for (uint i = 0; i < n_vertex; i++) delete[] degs[i];
     delete[] degs;
+
+    coreNodeP* root = tree.getNode();
 
 }
 
@@ -374,6 +354,7 @@ void FCTreeBuilderCoreParallel::ExecuteMix(MultilayerGraph &mg, FCCoreTree &tree
     uint* invalid = new uint[n_vertex];
 
     degs = new uint*[n_vertex];
+    memset(valid, true, sizeof(bool) * n_vertex);
 
 
     // Parallel init the degree and valid part
@@ -382,7 +363,7 @@ void FCTreeBuilderCoreParallel::ExecuteMix(MultilayerGraph &mg, FCCoreTree &tree
         #pragma omp for schedule(static)
         for(int v = 0; v < n_vertex; v ++){
              degs[v] = new uint[n_layers];
-             valid[v] = true; // 1 is valid
+            //  valid[v] = true; // 1 is valid
         } 
 
         #pragma omp for schedule(static) collapse(2)

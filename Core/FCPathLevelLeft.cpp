@@ -25,7 +25,13 @@ void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *co
     node->core = new uint[node->length];
     
     memcpy(node->core, core + new_e, (n_vertex - new_e) * sizeof(uint));
-
+    // if(node->k == 2 && node->lmd == 19){
+    //     for(uint i = 0; i < node->length; i ++){
+    //            cout << node->core[i] << " ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << "k = " << node->k << " lmd = " << node->lmd << " len = " << node->length << endl;
     //Every node store the its own degs, o_core, o_pos copy for the serial version
     if(serial){
         node->degs = new uint*[n_vertex];

@@ -198,7 +198,7 @@ int main(int argc, char* argv[]){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
-        coreNodeP* node = tree.getNode();
+        // coreNodeP* node = tree.getNode();
         FCTreeBuilderCoreParallel::Execute(mg, tree);
         auto end_time = omp_get_wtime(); 
         
@@ -216,7 +216,8 @@ int main(int argc, char* argv[]){
         auto end_time = omp_get_wtime(); 
         double elapsed_time = end_time - start_time;
         std::cout << "CoreIndex Parallel Elapsed time: " << elapsed_time << " seconds\n"; 
-
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;
     }
 
     if(method == "WdsFctree"){

@@ -87,7 +87,7 @@ void FCTreeBuilderLeft::restore(MultilayerGraph &mg, uint **degs, uint *core, ui
 }
 
 void FCTreeBuilderLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
-    if(klmd[1] == 1){
+
     cout << "( ";
     cout << "k=" << klmd[0] << ",";
     cout << "lmd=" << klmd[1];
@@ -97,9 +97,9 @@ void FCTreeBuilderLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint 
     //     cout << core[x] << " "; 
     // }
     cout << endl;
-    }
+    
 
-    std::ofstream outFile("/home/cheng/fctree/klmd/so_klmd.txt", std::ios::app);
+    std::ofstream outFile("/home/cheng/fctree/klmd/s2_klmd.txt", std::ios::app);
     if (outFile.is_open()) {
         outFile << klmd[0] << " " << klmd[1] << endl;
     }
@@ -204,7 +204,7 @@ void FCTreeBuilderLeft::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *c
 
     if(n_vertex - new_e > 0){
         count ++;
-        // PrintCoreInfor(klmd, core, new_e, n_vertex); 
+        PrintCoreInfor(klmd, core, new_e, n_vertex); 
         constructCore(klmd, core, new_e, n_vertex, node);
     }else{
         node->k = 0;

@@ -92,6 +92,7 @@ void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *co
 }
 
 void FCPathLevelLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex){
+    if(klmd[1] == 1){
     cout << "( ";
     cout << " k = " << klmd[0] << " ";
     cout << " lmd = " << klmd[1] << " ";
@@ -100,7 +101,7 @@ void FCPathLevelLeft::PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_
     // for(uint x = new_e; x < n_vertex; x ++){
     //     cout << core[x] << " "; 
     // }
-    cout << endl;
+    cout << endl;}
 }
 
 bool FCPathLevelLeft::check(uint **degs, uint u, uint* klmd, uint n_layers){

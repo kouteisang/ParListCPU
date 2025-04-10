@@ -17,7 +17,7 @@ public:
 
     static void BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count);
 
-    static void BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count, coreNode* node);
+    static void BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint *pos, uint *klmd, uint e, uint &count, coreNode* node, coreNode* father);
 
     static uint peel(MultilayerGraph &mg, uint **degs, uint *klmd, uint *core, uint *pos, uint s, uint e);
 
@@ -27,7 +27,7 @@ public:
 
     static void PrintCoreInfor(uint *klmd, uint *core, uint new_e, uint n_vertex);
 
-    static void constructCore(uint *klmd, uint *core, uint new_e, uint n_vertex, coreNode *node);
+    static void constructCore(uint *klmd, uint *core, uint new_e, uint n_vertex, coreNode *node, coreNode* father);
 };
 
 

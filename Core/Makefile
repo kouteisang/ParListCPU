@@ -130,6 +130,30 @@ CoreLib/fast:
 	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/build
 .PHONY : CoreLib/fast
 
+FCNaive.o: FCNaive.cpp.o
+.PHONY : FCNaive.o
+
+# target to build an object file
+FCNaive.cpp.o:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCNaive.cpp.o
+.PHONY : FCNaive.cpp.o
+
+FCNaive.i: FCNaive.cpp.i
+.PHONY : FCNaive.i
+
+# target to preprocess a source file
+FCNaive.cpp.i:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCNaive.cpp.i
+.PHONY : FCNaive.cpp.i
+
+FCNaive.s: FCNaive.cpp.s
+.PHONY : FCNaive.s
+
+# target to generate assembly for a file
+FCNaive.cpp.s:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCNaive.cpp.s
+.PHONY : FCNaive.cpp.s
+
 FCPathLevelLeft.o: FCPathLevelLeft.cpp.o
 .PHONY : FCPathLevelLeft.o
 
@@ -331,6 +355,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CoreLib"
+	@echo "... FCNaive.o"
+	@echo "... FCNaive.i"
+	@echo "... FCNaive.s"
 	@echo "... FCPathLevelLeft.o"
 	@echo "... FCPathLevelLeft.i"
 	@echo "... FCPathLevelLeft.s"

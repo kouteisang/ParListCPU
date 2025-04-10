@@ -54,7 +54,7 @@ void FCTreeBuilderCoreParallel::constructCore(coreNodeP *node, uint k, uint lmd,
     memcpy(node->valid, valid, sizeof(bool) * n_vertex);
     // memcpy(node->res, valid, sizeof(bool) * n_vertex);
     
-    // cout << "k = " << node->k << " lmd = " << node->lmd << " len = " << node->length << endl;
+    cout << "k = " << node->k << " lmd = " << node->lmd << " len = " << node->length << endl;
     // if(node->k == 2 && node->lmd == 19){
     // uint cnt = 0;
     // for(uint i = 0; i < n_vertex; i ++){

@@ -14,6 +14,8 @@ struct coreNodeP{
     bool *valid{nullptr}; // valid vertex
     bool *t_valid{nullptr}; // valid vertex
 
+    int total{0}; // the number of total peeled vertex;
+
 
     uint *valid2{nullptr}; // this is just for test
     int invalidIndex{0}; // this is just for test

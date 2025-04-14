@@ -23,6 +23,8 @@ struct coreNode{
 
     uint e{0}; // e is the start point
 
+    uint *diff_res{nullptr};
+
     coreNode* left{nullptr};
     coreNode* right{nullptr};
 

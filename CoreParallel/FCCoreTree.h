@@ -12,8 +12,12 @@ struct coreNodeP{
     uint** degs{nullptr};
     uint *core{nullptr}; // result core
     bool *valid{nullptr}; // valid vertex
+    // std::vector<bool> valid; 
     bool *t_valid{nullptr}; // valid vertex
 
+
+    std::vector<bool> validsync;
+    std::vector<int> res_vtx;
     int total{0}; // the number of total peeled vertex;
 
 

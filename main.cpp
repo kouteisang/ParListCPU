@@ -29,6 +29,10 @@
 #include "CoreParallel/FCTreeBuilderCoreParallelByK.h"
 #include "CoreParallel/FCSyncLeft.h"
 
+// Memory reduction
+#include "Core/FCPathMem.h"
+#include "CoreParallel/FCSyncMem.h"
+
 // A new test
 #include "CoreParallelNew/CoreParallelNew.h"
 
@@ -205,21 +209,21 @@ int main(int argc, char* argv[]){
 
 
          // This part to get the output
-        std::vector<int> ks = getK("/home/cheng/fctree/dataset/s2/k.txt");
-        std::vector<int> lmds = getLmd("/home/cheng/fctree/dataset/s2/lmd.txt");
+        // std::vector<int> ks = getK("/home/cheng/fctree/dataset/s2/k.txt");
+        // std::vector<int> lmds = getLmd("/home/cheng/fctree/dataset/s2/lmd.txt");
 
    
-        auto start_time_query = omp_get_wtime();
-        for(int i = 0; i < ks.size(); i ++){
-            uint k = uint(ks[i]);
-            uint lmd = uint(lmds[i]); 
-            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
-            // cout << res_node->k << " " << res_node->lmd << " " << res_node->length << endl;
-        }
-        auto end_time_query = omp_get_wtime();
-        auto total_time_query = end_time_query - start_time_query;
-        cout << "total time query = "<< total_time_query << endl;
-        cout << "average time query = "<< total_time_query/ks.size() << endl;
+        // auto start_time_query = omp_get_wtime();
+        // for(int i = 0; i < ks.size(); i ++){
+        //     uint k = uint(ks[i]);
+        //     uint lmd = uint(lmds[i]); 
+        //     coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+        //     // cout << res_node->k << " " << res_node->lmd << " " << res_node->length << endl;
+        // }
+        // auto end_time_query = omp_get_wtime();
+        // auto total_time_query = end_time_query - start_time_query;
+        // cout << "total time query = "<< total_time_query << endl;
+        // cout << "average time query = "<< total_time_query/ks.size() << endl;
         
         // if(k != 0 && lmd != 0){
         //     k = uint(k);
@@ -265,6 +269,7 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl; 
     }
 
+    // Mix strategy with Core Parallel and Path Parallel
     if(method == "mix"){
         omp_set_nested(1); // 允许嵌套并行
         omp_set_max_active_levels(2); // 最多允许两层并行
@@ -282,6 +287,39 @@ int main(int argc, char* argv[]){
 
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl; 
+    }
+
+    // CoreParallel with memory reduction strategy
+    if(method == "CoreMem"){
+        omp_set_num_threads(num_thread);
+
+        auto start_time = omp_get_wtime(); 
+        FCCoreTree tree(1, 1, mg.GetN());
+        // coreNodeP* node = tree.getNode();
+        FCSyncMem::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "CoreParallel Sync with Memory reduction Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "CoreParallel Sync with Memory reduction mem = " << mem << " MB" << endl; 
+    }
+    
+    if(method == "PathMem"){
+        omp_set_num_threads(num_thread);
+
+        auto start_time = omp_get_wtime(); 
+        FCTree tree(1, 1, mg.GetN());
+        coreNode* node = tree.getNode();
+        FCPathMem::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "PathParallel with Memory reduction Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "PathParallel Sync with Memory reduction mem = " << mem << " MB" << endl;  
     }
 
     // Baseline

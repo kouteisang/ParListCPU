@@ -119,11 +119,34 @@ void FCTreeBuilderLeft::constructCore(uint *klmd, uint *core, uint new_e, uint n
     
     // if(father != nullptr){
     //     delete[] father->core;
+    //     father->core = nullptr;
     //     if(father->length > node->length){
     //         cout << "father->length = "<< father->length << endl;
     //         cout << "father->length - node->length = "<< father->length - node->length << endl; 
     //         father->core = new uint[father->length - node->length];
     //         father->length = father->length - node->length; 
+    //     }
+    // }
+
+    // if (father != nullptr) {
+    //     // 先判断是否真的需要重建 core 数组
+    //     uint old_len = father->length;
+    //     uint new_len = old_len > node->length ? (old_len - node->length) : 0;
+    
+    //     if (father->core != nullptr) {
+    //         delete[] father->core;      // 确保释放原内存
+    //         father->core = nullptr;
+    //     }
+    
+    //     if (new_len > 0) {
+    //         father->core = new uint[new_len];  // 重新分配更小数组
+    //         father->length = new_len;
+    
+    //         // ⚠️ 如果你打算访问这段内存，一定要初始化它（例如置0）
+    //         // memset(father->core, 0, new_len * sizeof(uint));
+    //     } else {
+    //         father->core = nullptr;
+    //         father->length = 0;
     //     }
     // }
 }

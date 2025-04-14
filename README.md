@@ -26,9 +26,12 @@ method(-m):
 - naive
 - OptimizedLeft
 - OptimizedRight
-- PathParallel
-- CoreParallel
-- CoreIndex
+- PathParallel (Our Path Parallel strategy)
+- CoreParallel (Our Core Parallel strategy)
+- CoreParallelSync (Our Core Parallel algorithm reduce synchronization issue)
+- CoreIndex (Baseline)
+- mix (Combine Core Parallel and Path Parallel)
+- CoreMem (Core Parallel with memory saving)
 
 num of thread (-num_thread)
 

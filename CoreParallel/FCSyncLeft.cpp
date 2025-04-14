@@ -53,8 +53,9 @@ void FCSyncLeft::PeelSync(MultilayerGraph &mg, uint **degs, uint k, uint lmd, co
 
         int start = 0, end = 0;
         int cnt = 0;
+        int chunk_size = n_vertex / (320);
 
-        #pragma omp for schedule(dynamic, 1000)
+        #pragma omp for schedule(dynamic, chunk_size)
         for(int v = 0; v < n_vertex; v ++){
             cnt = 0;
             if(valid[v] == 0){
@@ -245,8 +246,9 @@ void FCSyncLeft::PeelSyncMix(MultilayerGraph &mg, uint **degs, uint k, uint lmd,
 
         int start = 0, end = 0;
         int cnt = 0;
+        int chunk_size = (n_vertex) / (80);
 
-        #pragma omp for schedule(dynamic, 1000)
+        #pragma omp for schedule(dynamic, chunk_size)
         for(int v = 0; v < n_vertex; v ++){
             cnt = 0;
             if(valid[v] == 0){

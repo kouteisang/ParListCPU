@@ -28,6 +28,7 @@
 #include "CoreParallel/FCTreeBuilderCoreParallel.h"
 #include "CoreParallel/FCTreeBuilderCoreParallelByK.h"
 #include "CoreParallel/FCSyncLeft.h"
+#include "CoreParallel/FCSyncRight.h"
 
 // Memory reduction
 #include "Core/FCPathMem.h"
@@ -269,6 +270,23 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl; 
     }
 
+        // Core Parallel with its own buffer
+    if(method == "CoreParallelSyncRight"){
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime(); 
+        FCCoreTree tree(1, 1, mg.GetN());
+        // coreNodeP* node = tree.getNode();
+        FCSyncRight::Execute(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Path Right Core Parallel Sync Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl; 
+    }
+    
+
     // Mix strategy with Core Parallel and Path Parallel
     if(method == "mix"){
         omp_set_nested(1); // 允许嵌套并行
@@ -280,6 +298,27 @@ int main(int argc, char* argv[]){
         FCCoreTree tree(1, 1, mg.GetN());
         // coreNodeP* node = tree.getNode();
         FCSyncLeft::ExecuteMix(mg, tree);
+        auto end_time = omp_get_wtime(); 
+        
+        double elapsed_time = end_time - start_time;
+        std::cout << "Mix Core/Path Parallel Sync Elapsed time: " << elapsed_time << " seconds\n";
+
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl; 
+    }
+
+
+    // Mix strategy with Core Parallel and Path Parallel
+    if(method == "mixright"){
+        omp_set_nested(1); // 允许嵌套并行
+        omp_set_max_active_levels(2); // 最多允许两层并行
+        
+        omp_set_num_threads(num_thread);
+
+        auto start_time = omp_get_wtime(); 
+        FCCoreTree tree(1, 1, mg.GetN());
+        // coreNodeP* node = tree.getNode();
+        FCSyncRight::ExecuteMix(mg, tree);
         auto end_time = omp_get_wtime(); 
         
         double elapsed_time = end_time - start_time;

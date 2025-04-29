@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/cheng/fctree
 
-CXX_FLAGS =  -O3 -fopenmp -std=gnu++11
+CXX_FLAGS = -fopenmp -std=gnu++11
 

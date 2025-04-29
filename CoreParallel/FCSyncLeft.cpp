@@ -44,7 +44,7 @@ void FCSyncLeft::PeelSync(MultilayerGraph &mg, uint **degs, uint k, uint lmd, co
     memset(cnts, 0, sizeof(int)*n_vertex);
     
     
-    #pragma omp parallel shared(cnts, valid, degs) num_threads(32)
+    #pragma omp parallel shared(cnts, valid, degs) //num_threads(32)
     {
 
         uint **adj_lst;
@@ -53,9 +53,9 @@ void FCSyncLeft::PeelSync(MultilayerGraph &mg, uint **degs, uint k, uint lmd, co
 
         int start = 0, end = 0;
         int cnt = 0;
-        int chunk_size = n_vertex / (320);
+        // int chunk_size = n_vertex;
 
-        #pragma omp for schedule(dynamic, chunk_size)
+        #pragma omp for schedule(dynamic, 1000)
         for(int v = 0; v < n_vertex; v ++){
             cnt = 0;
             if(valid[v] == 0){
@@ -107,7 +107,7 @@ void FCSyncLeft::PeelSync(MultilayerGraph &mg, uint **degs, uint k, uint lmd, co
     if(total < n_vertex){
         constructCoreSync(node, k, lmd, n_vertex, n_layers, valid, degs, total, serial);
     }
-
+    // cout << "total = " << total << endl;
     delete[] cnts;
    
 }
@@ -151,7 +151,7 @@ void FCSyncLeft::PathByK(MultilayerGraph &mg, uint **degs, uint k, uint lmd, cor
 
 } 
 
-void FCSyncLeft::BuildSubFCTreeSync(FCCoreTree &tree, MultilayerGraph &mg, uint **degs, uint *klmd, coreNodeP* node, bool* valid, int& total){
+void FCSyncLeft:: BuildSubFCTreeSync(FCCoreTree &tree, MultilayerGraph &mg, uint **degs, uint *klmd, coreNodeP* node, bool* valid, int& total){
     
     uint k = klmd[0];
     uint lmd = klmd[1];
@@ -182,7 +182,6 @@ void FCSyncLeft::BuildSubFCTreeSync(FCCoreTree &tree, MultilayerGraph &mg, uint 
 }
 
 void FCSyncLeft::Execute(MultilayerGraph &mg, FCCoreTree &tree){
-
     coreNodeP* node = tree.getNode();
     int count = 0;
     uint n_vertex = mg.GetN(); // number of vertex

@@ -202,6 +202,30 @@ FCPathLevelRight.cpp.s:
 	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCPathLevelRight.cpp.s
 .PHONY : FCPathLevelRight.cpp.s
 
+FCPathMem.o: FCPathMem.cpp.o
+.PHONY : FCPathMem.o
+
+# target to build an object file
+FCPathMem.cpp.o:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCPathMem.cpp.o
+.PHONY : FCPathMem.cpp.o
+
+FCPathMem.i: FCPathMem.cpp.i
+.PHONY : FCPathMem.i
+
+# target to preprocess a source file
+FCPathMem.cpp.i:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCPathMem.cpp.i
+.PHONY : FCPathMem.cpp.i
+
+FCPathMem.s: FCPathMem.cpp.s
+.PHONY : FCPathMem.s
+
+# target to generate assembly for a file
+FCPathMem.cpp.s:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f Core/CMakeFiles/CoreLib.dir/build.make Core/CMakeFiles/CoreLib.dir/FCPathMem.cpp.s
+.PHONY : FCPathMem.cpp.s
+
 FCTree.o: FCTree.cpp.o
 .PHONY : FCTree.o
 
@@ -364,6 +388,9 @@ help:
 	@echo "... FCPathLevelRight.o"
 	@echo "... FCPathLevelRight.i"
 	@echo "... FCPathLevelRight.s"
+	@echo "... FCPathMem.o"
+	@echo "... FCPathMem.i"
+	@echo "... FCPathMem.s"
 	@echo "... FCTree.o"
 	@echo "... FCTree.i"
 	@echo "... FCTree.s"

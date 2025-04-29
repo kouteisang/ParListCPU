@@ -130,7 +130,7 @@ void FCNaive::BuildSubFCTree(MultilayerGraph &mg, uint **degs, uint *core, uint 
 
     if(n_vertex - new_e > 0){
         // count ++;
-        PrintCoreInfor(k, lmd, core, new_e, n_vertex); 
+        // PrintCoreInfor(k, lmd, core, new_e, n_vertex); 
     }
 
 }

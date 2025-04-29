@@ -1,5 +1,5 @@
 # 声明库
-add_library(CoreParallelLib FCTreeBuilderCoreParallelByK.cpp FCTreeBuilderCoreParallel.cpp FCCoreTree.cpp FCSyncLeft.cpp FCSyncMem.cpp)
+add_library(CoreParallelLib FCTreeBuilderCoreParallelByK.cpp FCTreeBuilderCoreParallel.cpp FCCoreTree.cpp FCSyncLeft.cpp FCSyncRight.cpp FCSyncMem.cpp)
 
 # 包含目录
 target_include_directories(CoreParallelLib PUBLIC ${CMAKE_SOURCE_DIR})

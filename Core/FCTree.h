@@ -17,7 +17,7 @@ struct coreNode{
     uint *o_pos{nullptr}; // original pos
     uint *o_core{nullptr};
 
-    float layer_density{0.0};
+    double layer_density{0.0};
     uint density_k{0};
     uint density_lmd{0};
 

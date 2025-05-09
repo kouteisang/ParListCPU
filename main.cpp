@@ -304,8 +304,8 @@ int main(int argc, char* argv[]){
 
     // Mix strategy with Core Parallel and Path Parallel
     if(method == "mix"){
-        omp_set_nested(1); // 允许嵌套并行
-        omp_set_max_active_levels(2); // 最多允许两层并行
+        omp_set_nested(1); // allow nest parallelization
+        omp_set_max_active_levels(2); // maximum 2 layers
        
         omp_set_num_threads(num_thread);
 
@@ -426,9 +426,6 @@ int main(int argc, char* argv[]){
         double elapsed_time = end_time - start_time;
         cout << "Wds CoreIndex Time = " << elapsed_time << endl;
     }
-
-   
-
 
     if(method == "MLCDTime"){
         auto core_path = "/home/cheng/MlcDec/leaf/"+ dataset +"_cores.txt";

@@ -21,6 +21,8 @@ struct coreNode{
     uint density_k{0};
     uint density_lmd{0};
 
+    int num_select_layer{0};
+
     uint e{0}; // e is the start point
 
     uint *diff_res{nullptr};

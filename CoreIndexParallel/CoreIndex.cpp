@@ -183,9 +183,8 @@ void calculateWeightDenestSubgraphCommon(uint k, uint lmd, MultilayerGraph &mg, 
     sort(layer_degree, layer_degree+n_layers, cmp);
 
     for(uint l = 0; l < n_layers; l ++){
-        auto lid = layer_degree[l].id;
-        maximum_average_degree[lid] = layer_degree[lid].degree / n_node;
-        float layer_density = maximum_average_degree[lid] * pow((l+1), beta); 
+        maximum_average_degree[l] = layer_degree[l].degree / n_node;
+        float layer_density = maximum_average_degree[l] * pow((l+1), beta); 
         if(layer_density >= maximum_density){
             maximum_density = layer_density;
             res_k = k;

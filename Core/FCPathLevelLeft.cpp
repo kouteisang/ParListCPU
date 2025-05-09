@@ -86,6 +86,7 @@ void FCPathLevelLeft::constructCore(uint** degs, uint *klmd, uint *pos, uint *co
                 node->layer_density = layer_density;
                 node->density_k = node->k;
                 node->density_lmd = node->lmd;
+                node->num_select_layer = l + 1;
             }
             // cout << "layer_density = " << layer_density << " k = " << node->k << " lmd = " << node->lmd << endl;
         }

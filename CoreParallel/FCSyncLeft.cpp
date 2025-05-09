@@ -25,7 +25,7 @@ void FCSyncLeft::constructCoreSync(coreNodeP *node, uint k, uint lmd, uint n_ver
     //     }
     // }
    
-    // cout << "node->k = " << node->k << " node->lmd = " << node->lmd << " node->length = " << node->length << endl;
+    cout << "node->k = " << node->k << " node->lmd = " << node->lmd << " node->length = " << node->length << endl;
 
     if(serial){
         node->degs = new uint*[n_vertex];
@@ -251,7 +251,7 @@ void FCSyncLeft::PeelSyncMix(MultilayerGraph &mg, uint **degs, uint k, uint lmd,
         for(int v = 0; v < n_vertex; v ++){
             cnt = 0;
             if(valid[v] == 0){
-                 cnts[v] = 0;
+                cnts[v] = 0;
                 continue; // only process the valid vertex
             } 
             for(int l = 0; l < n_layers; l ++){

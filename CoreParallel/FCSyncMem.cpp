@@ -11,37 +11,44 @@ void FCSyncMem::constructCoreSync(coreNodeP *node, uint k, uint lmd, uint n_vert
         
     node->k = k;
     node->lmd = lmd;
-    node->valid = new bool[n_vertex];
     node->total = total;
     node->length = n_vertex - total;
-     
-    // Plan A store the valid array
-    memcpy(node->valid, valid, sizeof(bool) * n_vertex);
-
-    // int count = 0;
-    // for(int i = 0; i < n_vertex; i ++){
-    //     if(node->valid[i] == 1){
-    //         count ++;
-    //     }
-    // }
+    int cnt = 0;
    
     // cout << "node->k = " << node->k << " node->lmd = " << node->lmd << " node->length = " << node->length << endl;
 
     if(serial){
+        node->valid = new bool[n_vertex];
+        // node->valid_vertex = new uint[node->length];
+        node->valid_vertex.resize(node->length);
+        memcpy(node->valid, valid, sizeof(bool) * n_vertex);
         node->degs = new uint*[n_vertex];
         for(uint v = 0; v < n_vertex; v ++){
             node->degs[v] = new uint[n_layer];
             memcpy(node->degs[v], degs[v], n_layer * sizeof(uint));
+            if(valid[v]){
+                node->valid_vertex[cnt ++] = v;
+            }
         }
     }else{
 
-        for(int v = 0; v < n_vertex; v ++){
-            if(father->valid[v] == 1 && node->valid[v] == 0){
-                father->res_vtx.push_back(v);
+        node->valid_vertex.resize(node->length);
+        for(uint v = 0; v < n_vertex; v ++){
+            if(valid[v]){
+                node->valid_vertex[cnt ++] = v;
             }
         }
 
-        delete[] father->valid;
+        int diff_len = father->length -  node->length;
+        father->diff_res.reserve(diff_len);
+        // cout << "father->length = " << father->length << " " << " node->length = " << node->length << " diff_len = " << diff_len << endl;
+        auto it = std::set_difference(
+            father->valid_vertex.begin(), father->valid_vertex.end(),
+            node->valid_vertex.begin(), node->valid_vertex.end(),
+            std::back_inserter(father->diff_res)
+        );
+        father->valid_vertex.clear();           
+        father->valid_vertex.shrink_to_fit();   
     }
 
 }
@@ -62,10 +69,8 @@ void FCSyncMem::PeelSync(MultilayerGraph &mg, uint **degs, uint k, uint lmd, cor
 
         int start = 0, end = 0;
         int cnt = 0;
-        int chunk_size = n_vertex / (32 * 10);
 
-
-        #pragma omp for schedule(dynamic, chunk_size)
+        #pragma omp for schedule(dynamic, 1000)
         for(int v = 0; v < n_vertex; v ++){
             cnt = 0;
             if(valid[v] == 0){
@@ -156,7 +161,7 @@ void FCSyncMem::PathByK(MultilayerGraph &mg, uint **degs, uint k, uint lmd, core
         k += 1;
         coreNodeP* leftChild = new coreNodeP();
         node->left = leftChild;
-        PathByK(mg, degs, k, lmd, leftChild, node->valid, total, node);
+        PathByK(mg, degs, k, lmd, leftChild, valid, total, node);
     }
 
 } 

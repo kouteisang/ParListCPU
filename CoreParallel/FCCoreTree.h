@@ -14,6 +14,8 @@ struct coreNodeP{
     bool *valid{nullptr}; // valid vertex
     // std::vector<bool> valid; 
     bool *t_valid{nullptr}; // valid vertex
+    vector<uint> valid_vertex;
+    vector<uint> diff_res;
 
 
     std::vector<bool> validsync;

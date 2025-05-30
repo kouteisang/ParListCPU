@@ -25,7 +25,7 @@ void FCSyncLeft::constructCoreSync(coreNodeP *node, uint k, uint lmd, uint n_ver
     //     }
     // }
    
-    cout << "node->k = " << node->k << " node->lmd = " << node->lmd << " node->length = " << node->length << endl;
+    // cout << "node->k = " << node->k << " node->lmd = " << node->lmd << " node->length = " << node->length << endl;
 
     if(serial){
         node->degs = new uint*[n_vertex];

@@ -89,7 +89,7 @@ int main(int argc, char* argv[]){
         cout << "Use the FirmCore Tree Serial method as the user did not specify the method" << endl;
     }
 
-    cout << "method = " << method  << "dataset = " << dataset << endl;
+    cout << "method = " << method  << " dataset = " << dataset << endl;
 
     // load the dataset
     MultilayerGraph mg;
@@ -102,6 +102,33 @@ int main(int argc, char* argv[]){
     }
     cout << endl;
     mg.PrintStatistics();
+
+   
+    uint n_vertex = mg.GetN(); // number of vertex
+    uint n_layers = mg.getLayerNumber();
+
+    if(method == "fclist"){
+        uint lmdupper = mg.getLayerNumber();
+        int kupper = 0;
+
+        for(int l = 0; l < n_layers; l ++){
+            int cnt = 0;
+            int maxx = 0;
+            for(int v = 0; v < n_vertex; v ++){
+                int d = mg.GetGraph(l).GetAdjLst()[v][0];
+                maxx = std::max(maxx, d);
+            }
+            kupper = std::max(kupper, maxx); 
+        }
+        if(lmdupper <= kupper){
+            method = "OptimizedLeft";
+        }else{
+            method = "OptimizedRight";
+        }
+        cout << "kupper = " << kupper << endl;
+        cout << "lmdupper = " << lmdupper << endl;
+        cout << "method = " << method << endl;
+    }
 
     ll_uint *id2vtx = new ll_uint[mg.GetN()];
     mg.LoadId2VtxMap(id2vtx);
@@ -153,7 +180,7 @@ int main(int argc, char* argv[]){
     }
 
     // Serial
-    if(method == "OptimizedLeft"){
+    if(method == "lmdlist"){
         auto start_time = omp_get_wtime(); 
         FCTree tree(1, 1, mg.GetN());
         FCTreeBuilderLeft::Execute(mg, tree);
@@ -166,7 +193,7 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl; 
     }
 
-    if(method == "OptimizedRight"){
+    if(method == "klist"){
         auto start_time = omp_get_wtime();
         // This method simply traverse the tree
         // FCTreeBuilder::Execute(mg);
@@ -197,7 +224,7 @@ int main(int argc, char* argv[]){
     }
 
     // Path Parallel
-    if(method == "PathParallel"){
+    if(method == "ParList"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
@@ -239,7 +266,7 @@ int main(int argc, char* argv[]){
 
 
    // Path Parallel
-   if(method == "PathParallelRight"){
+   if(method == "ParListlRight"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime();
         FCTree tree(1, 1, mg.GetN());
@@ -270,7 +297,7 @@ int main(int argc, char* argv[]){
     }
 
     // Core Parallel with its own buffer
-    if(method == "CoreParallelSync"){
+    if(method == "ParCore"){
         omp_set_num_threads(num_thread);
         auto start_time = omp_get_wtime(); 
         FCCoreTree tree(1, 1, mg.GetN());
@@ -303,7 +330,7 @@ int main(int argc, char* argv[]){
     
 
     // Mix strategy with Core Parallel and Path Parallel
-    if(method == "mix"){
+    if(method == "hybrid"){
         omp_set_nested(1); // allow nest parallelization
         omp_set_max_active_levels(2); // maximum 2 layers
        
@@ -388,7 +415,7 @@ int main(int argc, char* argv[]){
         cout << "mem = " << mem << " MB" << endl;
     }
 
-    if(method == "WdsFctree"){
+    if(method == "WdsList"){
         uint res_k = 0;
         uint res_lmd = 0;
         uint res_len = 0;

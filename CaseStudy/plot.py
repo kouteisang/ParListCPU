@@ -10,6 +10,7 @@ with open("/home/cheng/fctree/CaseStudy/homo_k_1_lmd_5_pathlmd.txt", 'r') as fg:
             continue
         nodes.append(line.strip())
 
+
 # 读取多层边
 layers = {str(i): [] for i in range(7)}
 for i in range(7):
@@ -84,7 +85,13 @@ plt.legend(
 
 plt.axis('off')
 
+# 添加这个裁剪 + 保存段
+all_x = [x for x, y in pos.values()]
+all_y = [y for x, y in pos.values()]
+plt.xlim(min(all_x) - 0.05, max(all_x) + 0.05)
+plt.ylim(min(all_y) - 0.05, max(all_y) + 0.05)
+
 
 # ✅ 保存图像为高清 PNG
 plt.savefig("network_plot_ellipse_labeled.png", dpi=300, bbox_inches='tight', pad_inches=0.05)
-print("✅ 图像已保存为 network_plot_ellipse.png")
+print("✅ 图像已保存为 network_plot_ellipse_labeled.png")

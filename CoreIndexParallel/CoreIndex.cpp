@@ -6,6 +6,13 @@ CoreIndex::CoreIndex(/* args */){
 CoreIndex::~CoreIndex(){
 }
 
+struct  MaxDensity{
+    uint resk;
+    uint reslmd;
+    float density;
+};
+
+
 
 struct LayerDegree2{
     uint id;
@@ -14,6 +21,10 @@ struct LayerDegree2{
 
 bool cmp(const LayerDegree2 &a, const LayerDegree2 &b){
     return a.degree > b.degree;
+}
+
+bool cmp2(const MaxDensity &a, const MaxDensity &b){
+    return a.density > b.density;
 }
 
 
@@ -40,8 +51,63 @@ uint findLmdthLargest(uint *deg, uint lmd, uint n_layer){
 
     sort(deg_sort, deg_sort+n_layer, reverseSort);
 
-    return deg_sort[lmd-1];
+    int res = deg_sort[lmd-1];
+    delete[] deg_sort;
+
+    return res;
 }
+
+
+
+uint* get_index2(MultilayerGraph &mg, uint **degs, uint lmd, ll_uint *id2vtx){
+     
+
+    uint n_layer = mg.getLayerNumber();
+    uint n_vertex = mg.GetN(); 
+    uint *i_v = new uint[n_vertex];
+
+    std::vector<std::set<uint>> B(n_vertex+1);
+
+
+
+    for(uint v = 0; v < n_vertex; v ++){
+        i_v[v] = findLmdthLargest(degs[v], lmd, n_layer); // This is where the problem happens
+        B[i_v[v]].insert(v);
+    }
+
+    
+    for(uint k = 0; k <= n_vertex; k ++){
+        while(!B[k].empty()){ 
+            auto v = B[k].begin();
+            uint vv = *v;
+            B[k].erase(vv);
+            i_v[vv] = k;
+            std::set<uint> N;
+            for(uint l = 0; l < n_layer; l ++){
+                uint **adj_lst = mg.GetGraph(l).GetAdjLst();
+                for(uint u = 1; u <= adj_lst[vv][0]; u ++){
+                    uint nb_u = adj_lst[vv][u]; // node v's neighbourhood in layer l
+                    if(i_v[nb_u] <= k) continue;
+                    degs[nb_u][l] = degs[nb_u][l] - 1;
+                    if(degs[nb_u][l] + 1 == i_v[nb_u]){
+                        N.insert(nb_u);
+                    }
+                }
+            }
+            
+            for(const uint& u : N){
+                B[i_v[u]].erase(u);
+                i_v[u] = findLmdthLargest(degs[u], lmd, n_layer); 
+                B[std::max(i_v[u], k)].insert(u);
+            }
+
+        }
+
+    }
+
+    return i_v;
+}
+
 
 uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd, ll_uint *id2vtx){
      
@@ -98,6 +164,7 @@ uint* get_index(MultilayerGraph &mg, uint **degs, uint lmd, ll_uint *id2vtx){
 }
 
 
+
 void CoreIndex::Execute(MultilayerGraph &mg, ll_uint *id2vtx){
     cout << "I am the CoreIndex" << endl;
     uint n_layer = mg.getLayerNumber();
@@ -108,27 +175,75 @@ void CoreIndex::Execute(MultilayerGraph &mg, ll_uint *id2vtx){
 
     uint **degs;
     degs = new uint*[n_vertex];
-    // degs_sort = new uint*[n_vertex];
-    
-    // Parallel init the degree information
-    #pragma omp parallel
-    {
-        #pragma omp for schedule(static)
+   
+    uint** final_res = new uint*[n_layer+1];
+
+    for(int i = 0; i <= n_layer; i ++){
+        final_res[i] = new uint[n_vertex];
+    }
+
+
+    // int cnt = 0;
+    for(uint lmd = 1; lmd <= n_layer; lmd ++){
+
         for(int v = 0; v < n_vertex; v ++){
              degs[v] = new uint[n_layer];
         } 
 
-        #pragma omp for schedule(static) collapse(2)
-        for(int v = 0; v < n_vertex; v ++){
+         for(int v = 0; v < n_vertex; v ++){
             for(int l = 0; l < n_layer; l ++){
                 degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
             }
         }
+
+        uint *core = get_index2(mg, degs, lmd, id2vtx);
+        memcpy(final_res[lmd], core, n_vertex * sizeof(uint));
+
+        // if(lmd == 3){
+        //     for(int vv = 0; vv < n_vertex; vv ++){
+        //         cnt += final_res[lmd][vv] >= 4;
+        //     }
+        // }
+    
+        // Free core array
+        delete[] core;
+    }
+
+    // printf("cnt = %d\n", cnt);
+}
+
+
+
+void CoreIndex::ExecuteParallel(MultilayerGraph &mg, ll_uint *id2vtx){
+    cout << "I am the ParCoreIndex" << endl;
+    uint n_layer = mg.getLayerNumber();
+    uint n_vertex = mg.GetN();
+
+    cout << "n_layer = " << n_layer << endl;
+    cout << "n_vertex = " << n_vertex << endl;
+
+    uint **degs;
+    degs = new uint*[n_vertex];
+   
+    uint** final_res = new uint*[n_layer+1];
+
+    for(int i = 0; i <= n_layer; i ++){
+        final_res[i] = new uint[n_vertex];
+    }
+
+    for(int v = 0; v < n_vertex; v ++){
+        degs[v] = new uint[n_layer];
+    } 
+
+    for(int v = 0; v < n_vertex; v ++){
+        for(int l = 0; l < n_layer; l ++){
+            degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
+        }
     }
 
 
-
-
+    // int cnt = 0;
+    #pragma omp parallel for
     for(uint lmd = 1; lmd <= n_layer; lmd ++){
 
         // Copy the degs degree
@@ -137,26 +252,36 @@ void CoreIndex::Execute(MultilayerGraph &mg, ll_uint *id2vtx){
             degs_copy[v] = new uint[n_layer];
             memcpy(degs_copy[v], degs[v], n_layer * sizeof(uint));
         }
+        // for(int v = 0; v < n_vertex; v ++){
+        //      degs[v] = new uint[n_layer];
+        // } 
 
-        uint *core = get_index(mg, degs_copy, lmd, id2vtx);
+        //  for(int v = 0; v < n_vertex; v ++){
+        //     for(int l = 0; l < n_layer; l ++){
+        //         degs[v][l] = mg.GetGraph(l).GetAdjLst()[v][0];
+        //     }
+        // }
 
-        
-        cout << "lmd = " << lmd << endl;
-        cout << "==========" << endl;
-        std::ofstream outFile("/home/cheng/fctree/s1/s1-"+std::to_string(lmd)+".txt");
-        for(uint v = 0; v < n_vertex; v ++){
-            outFile << id2vtx[v] << ": " << core[v] << endl;
-            // cout << v << ": " << core[v] << endl;
-        }
-        outFile.close();
+        uint *core = get_index2(mg, degs_copy, lmd, id2vtx);
+        memcpy(final_res[lmd], core, n_vertex * sizeof(uint));
+
+        // if(lmd == 3){
+        //     for(int vv = 0; vv < n_vertex; vv ++){
+        //         cnt += final_res[lmd][vv] >= 4;
+        //     }
+        // }
+    
+        // Free core array
+        delete[] core;
     }
 
+    // printf("cnt = %d\n", cnt);
 }
 
 
 // The following two algorithms are getting weight denset subgraph algorithm
 
-void calculateWeightDenestSubgraphCommon(uint k, uint lmd, MultilayerGraph &mg, std::unordered_set<uint> valid_node_set, float &maximum_density, float beta, uint &res_k, uint &res_lmd){
+void calculateWeightDenestSubgraphCommon(uint k, uint lmd, MultilayerGraph &mg, std::unordered_set<uint> valid_node_set, MaxDensity &maximum_density, float beta, uint &res_k, uint &res_lmd){
     
     uint n_layers = mg.getLayerNumber();
     uint n_vertex = mg.GetN();
@@ -185,10 +310,10 @@ void calculateWeightDenestSubgraphCommon(uint k, uint lmd, MultilayerGraph &mg, 
     for(uint l = 0; l < n_layers; l ++){
         maximum_average_degree[l] = layer_degree[l].degree / n_node;
         float layer_density = maximum_average_degree[l] * pow((l+1), beta); 
-        if(layer_density >= maximum_density){
-            maximum_density = layer_density;
-            res_k = k;
-            res_lmd = lmd;
+        if(layer_density >= maximum_density.density){
+            maximum_density.density = layer_density;
+            maximum_density.resk = k;
+            maximum_density.reslmd = lmd;
         }
     }
     
@@ -196,7 +321,7 @@ void calculateWeightDenestSubgraphCommon(uint k, uint lmd, MultilayerGraph &mg, 
 
 }
 
-uint* get_wds(MultilayerGraph &mg, uint **degs, uint lmd, ll_uint *id2vtx, float &maximum_density, float beta, uint &res_k, uint &res_lmd){
+uint* get_wds(MultilayerGraph &mg, uint **degs, uint lmd, ll_uint *id2vtx, MaxDensity &maximum_density, float beta, uint &res_k, uint &res_lmd){
      
 
     uint n_layer = mg.getLayerNumber();
@@ -293,12 +418,25 @@ void CoreIndex::WdsCoreIndex(MultilayerGraph &mg, ll_uint *id2vtx, float beta){
         }
     }
 
-    float maximum_density = 0.0f;
+    // float maximum_density = 0.0f;
     uint res_k = 0;
     uint res_lmd = 0;
 
+    MaxDensity* maximum_density = new MaxDensity[n_layer+1];
+    
 
+
+    // for(uint lmd = 1; lmd <= n_layer; lmd ++){
+
+        
+    // }
+
+    #pragma omp parallel for
     for(uint lmd = 1; lmd <= n_layer; lmd ++){
+
+        maximum_density[lmd].reslmd = 0;
+        maximum_density[lmd].resk = 0;
+        maximum_density[lmd].density = 0;
 
         // Copy the degs degree
         uint **degs_copy = new uint*[n_vertex];
@@ -307,11 +445,13 @@ void CoreIndex::WdsCoreIndex(MultilayerGraph &mg, ll_uint *id2vtx, float beta){
             memcpy(degs_copy[v], degs[v], n_layer * sizeof(uint));
         }
 
-        get_wds(mg, degs_copy, lmd, id2vtx, maximum_density, beta, res_k, res_lmd);
+        get_wds(mg, degs_copy, lmd, id2vtx, maximum_density[lmd], beta, res_k, res_lmd);
     }
 
-    cout << "maximum_density = " << maximum_density << endl;
-    cout << "res_k = " << res_k << endl;
-    cout << "res_lmd = " << res_lmd << endl;
+    sort(maximum_density, maximum_density + n_layer, cmp2);
+
+    cout << "maximum_density = " << maximum_density[0].density << endl;
+    cout << "res_k = " << maximum_density[0].resk << endl;
+    cout << "res_lmd = " << maximum_density[0].reslmd << endl;
      
 }

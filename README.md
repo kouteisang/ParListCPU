@@ -40,6 +40,7 @@ method(-m):
 - ParCore (ParCore algorithm)
 - ParList (ParList)
 - CoreIndex (Baseline)
+- ParCoreIndex (parallel version of CoreIndex Baseline)
 - hybrid (Combine ParCore and ParList)
 - CoreMem (ParCore with memory saving strategy)
 - WdsList (densest subgraph mining)

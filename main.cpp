@@ -121,9 +121,9 @@ int main(int argc, char* argv[]){
             kupper = std::max(kupper, maxx); 
         }
         if(lmdupper <= kupper){
-            method = "OptimizedLeft";
+            method = "lmdlist";
         }else{
-            method = "OptimizedRight";
+            method = "klist";
         }
         cout << "kupper = " << kupper << endl;
         cout << "lmdupper = " << lmdupper << endl;
@@ -236,21 +236,21 @@ int main(int argc, char* argv[]){
         long double mem = GetPeakRSSInMB();
         cout << "mem = " << mem << " MB" << endl;
          // This part to get the output
-        std::vector<int> ks = getK("/home/cheng/fctree/dataset/s1/k.txt");
-        std::vector<int> lmds = getLmd("/home/cheng/fctree/dataset/s1/lmd.txt");
+        // std::vector<int> ks = getK("/home/cheng/fctree/dataset/s1/k.txt");
+        // std::vector<int> lmds = getLmd("/home/cheng/fctree/dataset/s1/lmd.txt");
 
    
-        auto start_time_query = omp_get_wtime();
-        for(int i = 0; i < ks.size(); i ++){
-            uint k = uint(ks[i]);
-            uint lmd = uint(lmds[i]); 
-            coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
-            // cout << res_node->k << " " << res_node->lmd << " " << res_node->length << endl;
-        }
-        auto end_time_query = omp_get_wtime();
-        auto total_time_query = end_time_query - start_time_query;
-        cout << "total time query = "<< total_time_query << endl;
-        cout << "average time query = "<< total_time_query/ks.size() << endl;
+        // auto start_time_query = omp_get_wtime();
+        // for(int i = 0; i < ks.size(); i ++){
+        //     uint k = uint(ks[i]);
+        //     uint lmd = uint(lmds[i]); 
+        //     coreNode* res_node = tree.getCoreByKAndLmdByRight(tree.getNode(), k, lmd);
+        //     // cout << res_node->k << " " << res_node->lmd << " " << res_node->length << endl;
+        // }
+        // auto end_time_query = omp_get_wtime();
+        // auto total_time_query = end_time_query - start_time_query;
+        // cout << "total time query = "<< total_time_query << endl;
+        // cout << "average time query = "<< total_time_query/ks.size() << endl;
         
         if(k != 0 && lmd != 0){
             k = uint(k);
@@ -403,11 +403,25 @@ int main(int argc, char* argv[]){
         cout << "PathParallel Sync with Memory reduction mem = " << mem << " MB" << endl;  
     }
 
+
+
     // Baseline
+
     if(method == "CoreIndex"){
-        omp_set_num_threads(num_thread);
+      
         auto start_time = omp_get_wtime();
         CoreIndex::Execute(mg, id2vtx);
+        auto end_time = omp_get_wtime(); 
+        double elapsed_time = end_time - start_time;
+        std::cout << "CoreIndex Serial Elapsed time: " << elapsed_time << " seconds\n"; 
+        long double mem = GetPeakRSSInMB();
+        cout << "mem = " << mem << " MB" << endl;   
+    }
+
+    if(method == "ParCoreIndex"){
+        omp_set_num_threads(num_thread);
+        auto start_time = omp_get_wtime();
+        CoreIndex::ExecuteParallel(mg, id2vtx);
         auto end_time = omp_get_wtime(); 
         double elapsed_time = end_time - start_time;
         std::cout << "CoreIndex Parallel Elapsed time: " << elapsed_time << " seconds\n"; 

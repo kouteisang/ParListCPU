@@ -202,6 +202,30 @@ FCSyncMem.cpp.s:
 	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f CoreParallel/CMakeFiles/CoreParallelLib.dir/build.make CoreParallel/CMakeFiles/CoreParallelLib.dir/FCSyncMem.cpp.s
 .PHONY : FCSyncMem.cpp.s
 
+FCSyncRight.o: FCSyncRight.cpp.o
+.PHONY : FCSyncRight.o
+
+# target to build an object file
+FCSyncRight.cpp.o:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f CoreParallel/CMakeFiles/CoreParallelLib.dir/build.make CoreParallel/CMakeFiles/CoreParallelLib.dir/FCSyncRight.cpp.o
+.PHONY : FCSyncRight.cpp.o
+
+FCSyncRight.i: FCSyncRight.cpp.i
+.PHONY : FCSyncRight.i
+
+# target to preprocess a source file
+FCSyncRight.cpp.i:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f CoreParallel/CMakeFiles/CoreParallelLib.dir/build.make CoreParallel/CMakeFiles/CoreParallelLib.dir/FCSyncRight.cpp.i
+.PHONY : FCSyncRight.cpp.i
+
+FCSyncRight.s: FCSyncRight.cpp.s
+.PHONY : FCSyncRight.s
+
+# target to generate assembly for a file
+FCSyncRight.cpp.s:
+	cd /home/cheng/fctree && $(MAKE) $(MAKESILENT) -f CoreParallel/CMakeFiles/CoreParallelLib.dir/build.make CoreParallel/CMakeFiles/CoreParallelLib.dir/FCSyncRight.cpp.s
+.PHONY : FCSyncRight.cpp.s
+
 FCTreeBuilderCoreParallel.o: FCTreeBuilderCoreParallel.cpp.o
 .PHONY : FCTreeBuilderCoreParallel.o
 
@@ -268,6 +292,9 @@ help:
 	@echo "... FCSyncMem.o"
 	@echo "... FCSyncMem.i"
 	@echo "... FCSyncMem.s"
+	@echo "... FCSyncRight.o"
+	@echo "... FCSyncRight.i"
+	@echo "... FCSyncRight.s"
 	@echo "... FCTreeBuilderCoreParallel.o"
 	@echo "... FCTreeBuilderCoreParallel.i"
 	@echo "... FCTreeBuilderCoreParallel.s"

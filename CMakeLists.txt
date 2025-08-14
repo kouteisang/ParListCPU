@@ -3,7 +3,6 @@ project(firmcore_baseline)
 
 set(CMAKE_CXX_STANDARD 11)
 
-# add_compile_options(-O3 -march=native)
 
 find_package(OpenMP REQUIRED)
 

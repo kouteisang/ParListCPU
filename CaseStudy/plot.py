@@ -60,7 +60,8 @@ for node, (x, y) in pos.items():
     plt.text(
         x, y + 0.035,     # 向上微移
         s=node,
-        fontsize=5,
+        color='black',
+        fontsize=9,
         ha='center',
         va='center'
     )
@@ -77,9 +78,9 @@ plt.legend(
     title='Interaction Type',
     loc='lower center',
     bbox_to_anchor=(0.5, -0.08),
-    ncol=4,
-    fontsize=7,
-    title_fontsize=8,
+    ncol=7,
+    fontsize=9,
+    title_fontsize=9,
     frameon=False
 )
 

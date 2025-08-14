@@ -19,6 +19,7 @@ for i in range(layer_num):
                 nodeset.add(y)
                 layers[str(i)].append((x, y))
 
+print()
 nodes = list(nodeset)
 
 # === 创建图对象 ===
@@ -68,8 +69,8 @@ for node, (x, y) in pos.items():
     plt.text(
         x, y + 0.01,
         s=node,
-        fontsize=8,
-        color='gray',
+        fontsize=14,
+        color='black',
         ha='center',
         va='bottom'
     )
@@ -88,9 +89,9 @@ plt.legend(
     title='Interaction Type',
     loc='lower center',
     bbox_to_anchor=(0.5, -0.08),
-    ncol=4,
-    fontsize=7,
-    title_fontsize=8,
+    ncol=5,
+    fontsize=9,
+    title_fontsize=9,
     frameon=False
 )
 
@@ -103,6 +104,10 @@ plt.xlim(min(all_x) - 0.1, max(all_x) + 0.1)
 plt.ylim(min(all_y) - 0.1, max(all_y) + 0.1)
 
 # 保存图像
-output_file = f"network_plot_target_{target_node}.png"
+output_file = f"new_network_plot_target_{target_node}.png"
 plt.savefig(output_file, dpi=300, pad_inches=0.05)
 print(f"✅ 图像已保存为 {output_file}")
+
+
+total_edges = sum(len(edges) for edges in layers.values())
+print(f"📊 与节点 {target_node} 有交互的边总数：{total_edges}")

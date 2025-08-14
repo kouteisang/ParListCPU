@@ -14,6 +14,8 @@ public:
 
     static void Execute(MultilayerGraph &mg, ll_uint *id2vtx);
 
+    static void ExecuteParallel(MultilayerGraph &mg, ll_uint *id2vtx);
+
     static void WdsCoreIndex(MultilayerGraph &mg, ll_uint *id2vtx, float beta);
 
 };

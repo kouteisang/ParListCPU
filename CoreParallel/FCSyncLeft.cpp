@@ -44,7 +44,7 @@ void FCSyncLeft::PeelSync(MultilayerGraph &mg, uint **degs, uint k, uint lmd, co
     memset(cnts, 0, sizeof(int)*n_vertex);
     
     
-    #pragma omp parallel shared(cnts, valid, degs) //num_threads(32)
+    #pragma omp parallel shared(cnts, valid, degs) num_threads(40)
     {
 
         uint **adj_lst;

@@ -39,4 +39,23 @@ void getResCore(std::vector<std::vector<int>> klmd, std::vector<std::vector<std:
 
 }
 
+
+void getResCoreOffline(std::vector<std::vector<int>> klmd, std::vector<std::vector<std::pair<int, int>>> &results, int n_layer, int k, int l){
+ 
+    std::vector<std::pair<int,int>>::const_iterator it =
+                std::lower_bound(results[l].begin(), results[l].end(), k,
+                    // comp 接收 (const element&, const value&)
+                    [](const std::pair<int,int>& a, int kval) {
+                        return a.first < kval;
+                    });
+
+    int cntt = 0;
+    
+    std::vector<int> values;
+    for (; it != results[l].end(); ++it) {
+        values.push_back(it->second);
+    }
+
+}
+
 #endif

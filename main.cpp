@@ -508,7 +508,7 @@ int main(int argc, char* argv[]){
 
     }
 
-    if(method == "CoreIndexTime"){
+    if(method == "CoreIndexTimeOnline"){
 
         auto klmd_path = "/home/cheng/fctree/klmd/"+ dataset +"_klmd.txt";
 
@@ -525,7 +525,7 @@ int main(int argc, char* argv[]){
         vector<vector<pair<int, int>>> results(mg.getLayerNumber()+1);
         int key, value;
 
-        for(uint l = 1; l <= mg.getLayerNumber(); l ++){
+        for(uint l = 1; l <= 1; l ++){
             std::ifstream coreFile("/home/cheng/fctree/Output/"+dataset+"-"+std::to_string(l)+".txt");
 
             while (coreFile >> key) {           // 读取第一个整数
@@ -546,4 +546,58 @@ int main(int argc, char* argv[]){
         std::cout << "Elapsed time: " << retrieve_time << " seconds\n";
     }
 
+
+
+    if(method == "CoreIndexTimeOffline"){
+
+        auto klmd_path = "/home/cheng/fctree/klmd/"+ dataset +"_klmd.txt";
+
+        vector<vector<int>> klmd(mg.getLayerNumber()+1);
+        
+        vector<vector<int>> cores;
+
+        std::ifstream inputFile(klmd_path); 
+        int kk, lmdd;
+        while (inputFile >> kk >> lmdd) {
+            klmd[lmdd].push_back(kk);
+        }
+
+        vector<vector<pair<int, int>>> results(mg.getLayerNumber()+1);
+        int key, value;
+
+        for(uint l = 1; l <= 1; l ++){
+            std::ifstream coreFile("/home/cheng/fctree/Output/"+dataset+"-"+std::to_string(l)+".txt");
+
+            while (coreFile >> key) {           // 读取第一个整数
+                coreFile.ignore(1, ':');        // 忽略冒号
+                coreFile >> std::ws >> value;    // 忽略空格并读取第二个整数
+                results[l].push_back(std::make_pair(value, key)); // 存入pair并加入vector
+            }
+
+            coreFile.close();
+        }
+        auto start_time = omp_get_wtime(); 
+
+        for (auto& vec : results) {
+            std::sort(vec.begin(), vec.end(),
+                    [](const std::pair<int,int>& a, const std::pair<int,int>& b){
+                        return a.first < b.first;
+                    });
+        }
+        
+        for(uint l = 1; l <= 1; l ++){
+            std::vector<int> ks = klmd[l];
+
+            for(uint i = 0; i < ks.size(); i ++){
+                uint k = ks[i];
+                getResCoreOffline(klmd, results, mg.getLayerNumber(), k, l);
+            }
+
+        }
+
+        auto end_time = omp_get_wtime();  
+        
+        double retrieve_time = end_time - start_time;
+        std::cout << "Elapsed time: " << retrieve_time << " seconds\n";
+    }
 }
